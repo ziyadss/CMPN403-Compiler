@@ -93,11 +93,11 @@ expression              : expression COMMA assign_expression
 
     /* An assignment expression is either an assignment expression or decays to a conditional expression. */
 assign_expression       : IDENTIFIER assignment_op assign_expression
-                        | condition_expression
+                        | ternary_expression
                         ;
 
-    /* An conditional expression is either a ternary expression or decays to a logical or expression. */
-condition_expression    : or_expression QUESTION expression COLON condition_expression
+    /* An ternary expression is either a ternary expression or decays to a logical or expression. */
+ternary_expression      : or_expression QUESTION expression COLON ternary_expression
                         | or_expression
                         ;
 
@@ -216,7 +216,7 @@ switch_case_list        : switch_case_list switch_case
                         ;
 
     /* The two case types of a switch case. */
-switch_case             : CASE condition_expression COLON statement
+switch_case             : CASE ternary_expression COLON statement
                         | DEFAULT COLON statement
                         ;
 
