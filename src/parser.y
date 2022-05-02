@@ -1,4 +1,4 @@
-%{  
+%{
     #include <stdio.h>
 	int yylex();
     int yyerror(const char *s) { fprintf(stderr, "Error: %s\n", s); return 1; }
@@ -94,12 +94,12 @@ expression              : expression COMMA assign_expression
     /* An assignment expression is either an assignment expression or decays to a conditional expression. */
 assign_expression       : IDENTIFIER assignment_op assign_expression
                         | condition_expression
-                        ;   
+                        ;
 
     /* An conditional expression is either a ternary expression or decays to a logical or expression. */
 condition_expression    : or_expression QUESTION expression COLON condition_expression
                         | or_expression
-                        ; 
+                        ;
 
     /* A logical or expression is either a logical or expression or decays to a logical and expression. */
 or_expression           : or_expression OR and_expression
@@ -295,7 +295,7 @@ assignment_op           : ADD_ASSIGN
                         | SHR_ASSIGN
                         | SUB_ASSIGN
                         | XOR_ASSIGN
-                        ;  
+                        ;
 
     /* Literals. */
 literal                 : FALSE
