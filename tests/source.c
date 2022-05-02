@@ -1,4 +1,4 @@
-int foo();
+int foo(int x, int);
 
 int main()
 {    
@@ -28,6 +28,7 @@ int main()
    // */
 
     float y = hello();
+    z = foo(p1, p2);
 
     unsigned int x = 3;
     int const unsigned y = 1;
@@ -39,5 +40,18 @@ int main()
             x++;
         case 1:
             x--;
+    }
+
+    try
+    {
+        throw x;
+    }
+    catch (int x)
+    {
+        x++;
+    }
+    finally
+    {
+        print(x);
     }
 }

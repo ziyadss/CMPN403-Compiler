@@ -45,27 +45,38 @@ top_level_statement     : declaration SEMICOLON
                         | function
                         ;
 
-    /* A declaration consists of a type, an optional identifier, and an optional initializer. */
-declaration             : type_modifiers initializer
+    /* A declaration consists of a type, and optionally initializers. */
+declaration             : type_modifiers initializer_list
                         | type_modifiers
                         ;
 
     /* Initializiers can be compounded using commas. */
-initializer             : IDENTIFIER ASSIGN assign_expression COMMA initializer
-                        | IDENTIFIER ASSIGN assign_expression
+initializer_list        : initializer_list COMMA initializer
+                        | initializer
+                        ;
+
+    /* An initializer is an identifier assigned an assignment expression. */
+initializer             : IDENTIFIER ASSIGN assign_expression
+                        | IDENTIFIER
                         ;
 
     /* A function consists of type modifiers, an identifier, a paramater list and optionally a body. */
 function                : type_modifiers IDENTIFIER LPAREN parameter_list RPAREN block_statement
+                        | type_modifiers IDENTIFIER LPAREN RPAREN block_statement
                         | type_modifiers IDENTIFIER LPAREN parameter_list RPAREN SEMICOLON
+                        | type_modifiers IDENTIFIER LPAREN RPAREN SEMICOLON
                         ;
 
-    /* A parameter list is an optional comma-separated list of declarations. */
-parameter_list          : parameter_list COMMA declaration
-                        | declaration
-                        |
+    /* A parameter list is an optional comma-separated list of parameters. */
+parameter_list          : parameter_list COMMA parameter
+                        | parameter
                         ;
-      
+
+    /* A parameter is a type, and an optional identifier. */
+parameter               : type_modifiers initializer
+                        | type_modifiers
+                        ;
+
     /* EXPRESSIONS */
 
     /* Expressions ordered with precedence in mind, following from lecture's guide to enfore precedence with grammar rules.
@@ -156,6 +167,7 @@ prefix_expression       : unary_op prefix_expression
     /* A postfix expression is either a postfix expression or decays to a base expression. */
 postfix_expression      : base_expression INC
                         | base_expression DEC
+                        | base_expression LPAREN optional_expression RPAREN
                         | base_expression
                         ;
 
@@ -220,12 +232,13 @@ jump_statement          : CONTINUE SEMICOLON
                         ;
 
     /* A try statement is a try block followed by one or more catch blocks and optionally a finally block. */
-try_statement           : TRY block_statement catch_blocks FINALLY block_statement
+try_statement           : TRY block_statement catch_block_list
+                        | TRY block_statement catch_block_list FINALLY block_statement
                         ;
 
     /* A catch block is a sequence of CATCHes and block statements. */
-catch_blocks            : CATCH block_statement catch_blocks
-                        | CATCH block_statement
+catch_block_list        : CATCH LPAREN type_modifiers IDENTIFIER RPAREN block_statement catch_block_list
+                        | CATCH LPAREN type_modifiers IDENTIFIER RPAREN block_statement
                         ;
 
     /* MISCELLANEOUS */
@@ -257,10 +270,13 @@ enum_type               : ENUM IDENTIFIER LBRACE enum_list RBRACE
                         | ENUM IDENTIFIER
                         ;
 
-    /* An enum list is a comma-separated list of enums, which are optionally assigned an assignment expression. */
-enum_list               : enum_list COMMA IDENTIFIER ASSIGN assign_expression
-                        | enum_list COMMA IDENTIFIER
-                        | IDENTIFIER ASSIGN assign_expression
+    /* An enum list is a comma-separated list of enums. */
+enum_list               : enum_list COMMA enum
+                        | enum
+                        ;
+
+    /* An enum is an identifier optionally assigned an assignment expression. */
+enum                    : IDENTIFIER ASSIGN assign_expression
                         | IDENTIFIER
                         ;
 
