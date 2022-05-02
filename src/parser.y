@@ -55,7 +55,7 @@ initializer_list        : initializer_list COMMA initializer
                         | initializer
                         ;
 
-    /* An initializer is an identifier assigned an assignment expression. */
+    /* An initializer is an identifier optionally assigned an assignment expression. */
 initializer             : IDENTIFIER ASSIGN assign_expression
                         | IDENTIFIER
                         ;
@@ -199,9 +199,9 @@ block_statement         : LBRACE block_items RBRACE
                         ;
 
     /* A block consists of a sequence of statements and declarations. */
-block_items             : block_items declaration
+block_items             : block_items declaration SEMICOLON
                         | block_items statement
-                        | declaration
+                        | declaration SEMICOLON
                         | statement
                         ;
 
@@ -244,10 +244,10 @@ catch_block_list        : CATCH LPAREN type_modifiers IDENTIFIER RPAREN block_st
     /* MISCELLANEOUS */
 
     /* A sequence of type modifiers. Need semantic checks.*/
-type_modifiers          : CONST type_modifiers
-                        | CONST
-                        | type_modifier type_modifiers
+type_modifiers          : type_modifiers type_modifier 
+                        | type_modifiers CONST 
                         | type_modifier
+                        | CONST
                         ;
 
     /* A type modifier is a data type. */
@@ -265,19 +265,9 @@ type_modifier           : BOOL
                         ;
 
     /* An enum type is ENUM followed by an identifier, or an (optionally anonymous) enum declaration. */
-enum_type               : ENUM IDENTIFIER LBRACE enum_list RBRACE
-                        | ENUM LBRACE enum_list RBRACE
+enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE
+                        | ENUM LBRACE initializer_list RBRACE
                         | ENUM IDENTIFIER
-                        ;
-
-    /* An enum list is a comma-separated list of enums. */
-enum_list               : enum_list COMMA enum
-                        | enum
-                        ;
-
-    /* An enum is an identifier optionally assigned an assignment expression. */
-enum                    : IDENTIFIER ASSIGN assign_expression
-                        | IDENTIFIER
                         ;
 
     /* Unary operators. */
