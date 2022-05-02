@@ -208,13 +208,17 @@ block_items             : block_items declaration SEMICOLON
     /* Selection statements are IFs and SWITCHes. */
 selection_statement     : IF LPAREN expression RPAREN statement ELSE statement
                         | IF LPAREN expression RPAREN statement
-                        | SWITCH LPAREN expression RPAREN LBRACE switch_cases RBRACE
+                        | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE
                         ;
 
-    /* The two case types of a switch statement. */
-switch_cases            : switch_cases CASE condition_expression COLON statement
-                        | switch_cases DEFAULT COLON statement
-                        | 
+    /* A switch case list is a sequence of switch cases. */
+switch_case_list        : switch_case_list switch_case
+                        | switch_case
+                        ;
+
+    /* The two case types of a switch case. */
+switch_case             : CASE condition_expression COLON statement
+                        | DEFAULT COLON statement
                         ;
 
     /* Iteration statements are WHILEs and DO WHILES and FORs */
