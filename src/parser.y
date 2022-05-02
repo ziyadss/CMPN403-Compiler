@@ -23,7 +23,7 @@
 %token TRY CATCH FINALLY THROW
 
     /* Operators. */
-%token COLON COMMA LBRACE LPAREN QUESTION RBRACE RPAREN SEMICOLON
+%token COLON COMMA LBRACE LPAREN QUESTION RBRACE RPAREN SEMICOLON 
 %token ADD_ASSIGN AND_ASSIGN ASSIGN DIV_ASSIGN MOD_ASSIGN MUL_ASSIGN OR_ASSIGN SHL_ASSIGN SHR_ASSIGN SUB_ASSIGN XOR_ASSIGN
 %token ADD AND BIT_AND BIT_NOT BIT_OR DEC DIV EQ GE GT INC LE LT MOD MUL NE NOT OR SHL SHR SUB XOR
 
@@ -191,6 +191,7 @@ statement               : block_statement
                         | jump_statement
                         | optional_expression SEMICOLON
                         | try_statement
+                        | declaration SEMICOLON
                         ;
 
     /* A block statement is a brace-enclosed list of block items. */
@@ -199,9 +200,7 @@ block_statement         : LBRACE block_items RBRACE
                         ;
 
     /* A block consists of a sequence of statements and declarations. */
-block_items             : block_items declaration SEMICOLON
-                        | block_items statement
-                        | declaration SEMICOLON
+block_items             : block_items statement 
                         | statement
                         ;
 
