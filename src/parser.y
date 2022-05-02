@@ -23,12 +23,12 @@
 %token TRY CATCH FINALLY THROW
 
     /* Operators. */
-%token COLON COMMA LBRACE LPAREN QUESTION RBRACE RPAREN SEMICOLON 
+%token COLON COMMA LBRACE LPAREN QUESTION RBRACE RPAREN SEMICOLON
 %token ADD_ASSIGN AND_ASSIGN ASSIGN DIV_ASSIGN MOD_ASSIGN MUL_ASSIGN OR_ASSIGN SHL_ASSIGN SHR_ASSIGN SUB_ASSIGN XOR_ASSIGN
 %token ADD AND BIT_AND BIT_NOT BIT_OR DEC DIV EQ GE GT INC LE LT MOD MUL NE NOT OR SHL SHR SUB XOR
 
     /* Bool numeric, character, and string literals. */
-%token FALSE TRUE <intValue>INT_LITERAL <floatValue>FLOAT_LITERAL <charValue>CHAR_LITERAL <stringValue>STRING_LITERAL 
+%token FALSE TRUE <intValue>INT_LITERAL <floatValue>FLOAT_LITERAL <charValue>CHAR_LITERAL <stringValue>STRING_LITERAL
 
     /* Identifier. */
 %token IDENTIFIER
@@ -36,10 +36,10 @@
 %%
 
     /* A program consists of a number of top level statements. */
-program                 : program top_level_statement 
+program                 : program top_level_statement
                         | top_level_statement
                         ;
-    
+
     /* Top level statements only declare or define functions and other language constructs (variables, enums, etc.). */
 top_level_statement     : declaration SEMICOLON
                         | function
@@ -200,7 +200,7 @@ block_statement         : LBRACE block_items RBRACE
                         ;
 
     /* A block consists of a sequence of statements and declarations. */
-block_items             : block_items statement 
+block_items             : block_items statement
                         | statement
                         ;
 
@@ -247,8 +247,8 @@ catch_block_list        : CATCH LPAREN type_modifiers IDENTIFIER RPAREN block_st
     /* MISCELLANEOUS */
 
     /* A sequence of type modifiers. Need semantic checks.*/
-type_modifiers          : type_modifiers type_modifier 
-                        | type_modifiers CONST 
+type_modifiers          : type_modifiers type_modifier
+                        | type_modifiers CONST
                         | type_modifier
                         | CONST
                         ;
@@ -314,7 +314,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
         return 1;
     }
-    
+
     yyin = fopen(argv[1], "r");
     if (yyin == NULL)
     {
