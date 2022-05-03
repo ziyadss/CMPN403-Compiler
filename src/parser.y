@@ -27,7 +27,7 @@
 %token ADD_ASSIGN AND_ASSIGN ASSIGN DIV_ASSIGN MOD_ASSIGN MUL_ASSIGN OR_ASSIGN SHL_ASSIGN SHR_ASSIGN SUB_ASSIGN XOR_ASSIGN
 %token ADD AND BIT_AND BIT_NOT BIT_OR DEC DIV EQ GE GT INC LE LT MOD MUL NE NOT OR SHL SHR SUB XOR
 
-    /* Bool numeric, character, and string literals. */
+    /* Boolean, numeric, character, and string literals. */
 %token FALSE TRUE <intValue>INT_LITERAL <floatValue>FLOAT_LITERAL <charValue>CHAR_LITERAL <stringValue>STRING_LITERAL
 
     /* Identifier. */
@@ -46,8 +46,8 @@ top_level_statement     : declaration SEMICOLON
                         ;
 
     /* A declaration consists of a type, and optionally initializers. */
-declaration             : type_modifiers initializer_list
-                        | type_modifiers
+declaration             : type_modifier_list initializer_list
+                        | type_modifier_list
                         ;
 
     /* Initializiers can be compounded using commas. */
@@ -60,21 +60,21 @@ initializer             : IDENTIFIER ASSIGN assign_expression
                         | IDENTIFIER
                         ;
 
-    /* A function consists of type modifiers, an identifier, a paramater list and optionally a body. */
-function                : type_modifiers IDENTIFIER LPAREN parameter_list RPAREN block_statement
-                        | type_modifiers IDENTIFIER LPAREN RPAREN block_statement
-                        | type_modifiers IDENTIFIER LPAREN parameter_list RPAREN SEMICOLON
-                        | type_modifiers IDENTIFIER LPAREN RPAREN SEMICOLON
+    /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
+function                : type_modifier_list IDENTIFIER LPAREN parameter_list RPAREN block_statement
+                        | type_modifier_list IDENTIFIER LPAREN RPAREN block_statement
+                        | type_modifier_list IDENTIFIER LPAREN parameter_list RPAREN SEMICOLON
+                        | type_modifier_list IDENTIFIER LPAREN RPAREN SEMICOLON
                         ;
 
-    /* A parameter list is an optional comma-separated list of parameters. */
+    /* A parameter list is a comma-separated list of parameters. */
 parameter_list          : parameter_list COMMA parameter
                         | parameter
                         ;
 
-    /* A parameter is a type, and an optional identifier. */
-parameter               : type_modifiers initializer
-                        | type_modifiers
+    /* A parameter is a type, and an optional initializer. */
+parameter               : type_modifier_list initializer
+                        | type_modifier_list
                         ;
 
     /* EXPRESSIONS */
@@ -91,7 +91,7 @@ expression              : expression COMMA assign_expression
                         | assign_expression
                         ;
 
-    /* An assignment expression is either an assignment expression or decays to a conditional expression. */
+    /* An assignment expression is either an assignment expression or decays to a ternary expression. */
 assign_expression       : IDENTIFIER assignment_op assign_expression
                         | ternary_expression
                         ;
@@ -164,7 +164,7 @@ prefix_expression       : unary_op prefix_expression
                         | postfix_expression
                         ;
 
-    /* A postfix expression is either a postfix expression or decays to a base expression. */
+    /* A postfix expression is either a postfix expression (including a function call) or decays to a base expression. */
 postfix_expression      : base_expression INC
                         | base_expression DEC
                         | base_expression LPAREN optional_expression RPAREN
@@ -184,7 +184,7 @@ optional_expression     : expression
 
     /* STATEMENTS */
 
-    /* A statement is a block, selection, iteration, jump, or a semicolon optionally preceded by an expression. */
+    /* A statement is one of a block, selection, iteration, jump, a semicolon optionally preceded by an expression, a try or a declaration followed by a semicolon. */
 statement               : block_statement
                         | selection_statement
                         | iteration_statement
@@ -194,13 +194,13 @@ statement               : block_statement
                         | declaration SEMICOLON
                         ;
 
-    /* A block statement is a brace-enclosed list of block items. */
-block_statement         : LBRACE block_items RBRACE
+    /* A block statement is a brace-enclosed list of optional block items. */
+block_statement         : LBRACE block_item_list RBRACE
                         | LBRACE RBRACE
                         ;
 
-    /* A block consists of a sequence of statements and declarations. */
-block_items             : block_items statement
+    /* Block items can be compounded, and are statements. */
+block_item_list         : block_item_list statement
                         | statement
                         ;
 
@@ -240,15 +240,15 @@ try_statement           : TRY block_statement catch_block_list
                         ;
 
     /* A catch block is a sequence of CATCHes and block statements. */
-catch_block_list        : CATCH LPAREN type_modifiers IDENTIFIER RPAREN block_statement catch_block_list
-                        | CATCH LPAREN type_modifiers IDENTIFIER RPAREN block_statement
+catch_block_list        : CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement catch_block_list
+                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement
                         ;
 
     /* MISCELLANEOUS */
 
     /* A sequence of type modifiers. Need semantic checks.*/
-type_modifiers          : type_modifiers type_modifier
-                        | type_modifiers CONST
+type_modifier_list      : type_modifier_list type_modifier
+                        | type_modifier_list CONST
                         | type_modifier
                         | CONST
                         ;
