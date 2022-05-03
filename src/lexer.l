@@ -92,7 +92,7 @@ H   [0-9a-fA-F]
 "-"                                 return SUB;
 "^"                                 return XOR;
 
-    /* Bool, numeric, character, and string literals. */
+    /* Boolean, numeric, character, and string literals. */
 "false"                             return FALSE;
 "true"                              return TRUE;
 
