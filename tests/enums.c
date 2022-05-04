@@ -29,5 +29,5 @@ int main()
         ENUM_C
     } enum_var_2 = ENUM_A;
 
-    // enum enum_type_2 enum_var_3 = ENUM_TYPE_IDK;
+    enum enum_type_2 enum_var_3 = ENUM_TYPE_IDK;
 }
