@@ -89,4 +89,19 @@ int main()
     {
         print(x);
     }
+
+    try
+        x++;
+    catch
+        x--;
+    finally
+        x++;
+
+    try x++;
+    catch (int x) x--;
+    catch x--;
+    finally x++;
+
+    try x++;
+    catch (int x) x--;
 }

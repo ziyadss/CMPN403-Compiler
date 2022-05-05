@@ -2,6 +2,7 @@ int foo(int x, int);
 
 int main()
 {    
+    ;;;;;;
     bool hehe = true;
     char z = 'z';
     int dec = 3, hex = 0x3A, bin = 0b11101010, oct = 077;

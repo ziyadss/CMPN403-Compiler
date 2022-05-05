@@ -234,18 +234,19 @@ jump_statement          : CONTINUE SEMICOLON
                         | THROW optional_expression SEMICOLON
                         ;
 
-    /* A try statement is a try block followed by one or more catch blocks and optionally a final catch and/or a finally block. */
-try_statement           : TRY statement catch_block_list final_catch
-                        | TRY statement catch_block_list final_catch FINALLY statement
+    /* A try statement is a try block followed by one or more catch blocks, and an optional finally block. */
+try_statement           : TRY statement catch_block_list
+                        | TRY statement catch_block_list FINALLY statement
                         ;
 
-    /* A catch block is a sequence of CATCHes and block statements. */
-catch_block_list        : catch_block_list CATCH LPAREN type_modifier_list IDENTIFIER RPAREN statement
+    /* A catch block list is a sequence of CATCHes and statements, the last which can be a catch-all. */
+catch_block_list        : non_final_catch_block CATCH statement
+                        | non_final_catch_block
+                        | CATCH statement
+                        ;
+
+non_final_catch_block   : non_final_catch_block CATCH LPAREN type_modifier_list IDENTIFIER RPAREN statement
                         | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN statement
-                        ;
-
-final_catch             : CATCH statement
-                        |
                         ;
 
     /* MISCELLANEOUS */
