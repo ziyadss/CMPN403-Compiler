@@ -81,8 +81,7 @@ int main()
     {
         x++;
     }
-    // catch (...) -- should we allow this? or an equivalent?
-    catch (float y)
+    catch ()
     {
         x++;
     }

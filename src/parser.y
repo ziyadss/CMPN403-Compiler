@@ -205,8 +205,6 @@ block_item_list         : block_item_list statement
                         ;
 
     /* Selection statements are IFs and SWITCHes. */
-    
-    /* TO DO: fix dangling else */
 selection_statement     : IF LPAREN expression RPAREN statement ELSE statement
                         | IF LPAREN expression RPAREN statement
                         | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE
@@ -236,14 +234,18 @@ jump_statement          : CONTINUE SEMICOLON
                         | THROW optional_expression SEMICOLON
                         ;
 
-    /* A try statement is a try block followed by one or more catch blocks and optionally a finally block. */
-try_statement           : TRY block_statement catch_block_list
-                        | TRY block_statement catch_block_list FINALLY block_statement
+    /* A try statement is a try block followed by one or more catch blocks and optionally a final catch and/or a finally block. */
+try_statement           : TRY statement catch_block_list final_catch
+                        | TRY statement catch_block_list final_catch FINALLY statement
                         ;
 
     /* A catch block is a sequence of CATCHes and block statements. */
-catch_block_list        : catch_block_list CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement
-                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement
+catch_block_list        : catch_block_list CATCH LPAREN type_modifier_list IDENTIFIER RPAREN statement
+                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN statement
+                        ;
+
+final_catch             : CATCH statement
+                        |
                         ;
 
     /* MISCELLANEOUS */
