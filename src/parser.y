@@ -165,11 +165,9 @@ prefix_expression       : unary_op prefix_expression
                         ;
 
     /* A postfix expression is either a postfix expression (including a function call) or decays to a base expression. */
-
-    /* TO DO: fix shift/reduce conflict caused by the base_expression rule */
-postfix_expression      : base_expression INC
-                        | base_expression DEC
-                        | base_expression LPAREN optional_expression RPAREN
+postfix_expression      : postfix_expression INC
+                        | postfix_expression DEC
+                        | postfix_expression LPAREN optional_expression RPAREN
                         | base_expression
                         ;
 
@@ -228,7 +226,7 @@ switch_case             : CASE ternary_expression COLON statement
 iteration_statement     : WHILE LPAREN expression RPAREN statement
                         | DO statement WHILE LPAREN expression RPAREN SEMICOLON
                         | FOR LPAREN optional_expression SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement
-                        | FOR LPAREN declaration optional_expression SEMICOLON optional_expression RPAREN statement
+                        | FOR LPAREN declaration SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement 
                         ;
 
     /* Jump statements are ones which affect control flow. */
