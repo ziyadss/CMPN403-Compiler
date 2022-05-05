@@ -237,13 +237,13 @@ jump_statement          : CONTINUE SEMICOLON
                         ;
 
     /* A try statement is a try block followed by one or more catch blocks and optionally a finally block. */
-try_statement           : TRY block_statement catch_block_list
-                        | TRY block_statement catch_block_list FINALLY block_statement
+try_statement           : TRY statement catch_block_list
+                        | TRY statement catch_block_list FINALLY statement
                         ;
 
     /* A catch block is a sequence of CATCHes and block statements. */
-catch_block_list        : catch_block_list CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement
-                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement
+catch_block_list        : catch_block_list CATCH LPAREN type_modifier_list IDENTIFIER RPAREN statement
+                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN statement
                         ;
 
     /* MISCELLANEOUS */
