@@ -16,36 +16,36 @@ H   [0-9a-fA-F]
 {WS}+                               ;
 
     /* Keywords. */
-"const"		                        return CONST;
+"const"                             return CONST;
 
-"bool"		                        return BOOL;
-"char"		                        return CHAR;
-"double"	                        return DOUBLE;
-"float"		                        return FLOAT;
-"int"		                        return INT;
-"long"		                        return LONG;
-"short"		                        return SHORT;
-"signed"	                        return SIGNED;
-"unsigned"	                        return UNSIGNED;
-"void"		                        return VOID;
+"bool"                              return BOOL;
+"char"                              return CHAR;
+"double"                            return DOUBLE;
+"float"                             return FLOAT;
+"int"                               return INT;
+"long"                              return LONG;
+"short"                             return SHORT;
+"signed"                            return SIGNED;
+"unsigned"                          return UNSIGNED;
+"void"                              return VOID;
 
-"break"		                        return BREAK;
-"case"		                        return CASE;
-"continue"	                        return CONTINUE;
-"default"	                        return DEFAULT;
-"do"		                        return DO;
-"else"		                        return ELSE;
-"enum"		                        return ENUM;
-"for"		                        return FOR;
-"if"		                        return IF;
-"return"	                        return RETURN;
-"switch"	                        return SWITCH;
-"while"		                        return WHILE;
+"break"                             return BREAK;
+"case"                              return CASE;
+"continue"                          return CONTINUE;
+"default"                           return DEFAULT;
+"do"                                return DO;
+"else"                              return ELSE;
+"enum"                              return ENUM;
+"for"                               return FOR;
+"if"                                return IF;
+"return"                            return RETURN;
+"switch"                            return SWITCH;
+"while"                             return WHILE;
 
-"try"                                return TRY;
-"catch"                              return CATCH;
-"finally"                            return FINALLY;
-"throw"                              return THROW;
+"try"                               return TRY;
+"catch"                             return CATCH;
+"finally"                           return FINALLY;
+"throw"                             return THROW;
 
     /* Operators. */
 ":"                                 return COLON;
@@ -107,7 +107,7 @@ H   [0-9a-fA-F]
 0[xX]{H}+\.?[pP][+-]?{H}+           { yylval.floatValue = strtod(yytext, NULL);         return FLOAT_LITERAL; }
 0[xX]{H}*\.{H}+[pP][+-]?{H}+        { yylval.floatValue = strtod(yytext, NULL);         return FLOAT_LITERAL; }
 
-\'[^']\'	                        { yylval.charValue = yytext[1];                     return CHAR_LITERAL; }
+\'[^']\'                            { yylval.charValue = yytext[1];                     return CHAR_LITERAL; }
 \"[^"]*\"                           { 
                                         free(yylval.stringValue);
                                         yylval.stringValue = malloc(yyleng);

@@ -1,9 +1,9 @@
 %{
     #include <stdio.h>
-	int yylex();
+    int yylex();
     int yyerror(const char *s) { fprintf(stderr, "Error: %s\n", s); return 1; }
     int yywrap() { return 1; }
-	extern FILE *yyin;
+    extern FILE *yyin;
 
     int yydebug = 1;
 %}
