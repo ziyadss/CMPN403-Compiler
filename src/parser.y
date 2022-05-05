@@ -244,7 +244,7 @@ try_statement           : TRY block_statement catch_block_list
                         ;
 
     /* A catch block is a sequence of CATCHes and block statements. */
-catch_block_list        : CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement catch_block_list
+catch_block_list        : catch_block_list CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement
                         | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement
                         ;
 
