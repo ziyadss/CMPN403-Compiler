@@ -205,8 +205,6 @@ block_item_list         : block_item_list statement
                         ;
 
     /* Selection statements are IFs and SWITCHes. */
-    
-    /* TO DO: fix dangling else */
 selection_statement     : IF LPAREN expression RPAREN statement ELSE statement
                         | IF LPAREN expression RPAREN statement
                         | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE
