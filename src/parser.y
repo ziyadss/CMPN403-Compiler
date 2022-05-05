@@ -218,15 +218,15 @@ switch_case_list        : switch_case_list switch_case
                         ;
 
     /* The two case types of a switch case. */
-switch_case             : CASE ternary_expression COLON statement
-                        | DEFAULT COLON statement
+switch_case             : CASE ternary_expression COLON block_item_list
+                        | DEFAULT COLON block_item_list
                         ;
 
     /* Iteration statements are WHILEs and DO WHILES and FORs */
 iteration_statement     : WHILE LPAREN expression RPAREN statement
                         | DO statement WHILE LPAREN expression RPAREN SEMICOLON
                         | FOR LPAREN optional_expression SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement
-                        | FOR LPAREN declaration SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement 
+                        | FOR LPAREN declaration SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement
                         ;
 
     /* Jump statements are ones which affect control flow. */
