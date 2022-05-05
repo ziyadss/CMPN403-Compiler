@@ -81,7 +81,7 @@ int main()
     {
         x++;
     }
-    catch ()
+    catch
     {
         x++;
     }
