@@ -2,7 +2,7 @@
 
 Languages and Compilers Project - third year CUFE students.
 
-A compiler for a mini-language inspired by C.  
+A compiler for a language inspired by C.  
 Major differences include:
 
 - No pointers.
@@ -16,18 +16,10 @@ Currently in phase 1, this project consists of two phases:
 - Lexer and parser rules.
 - TODO
 
-## Building
+## Building and Running
 
 ```shell
-    mkdir -p build bin
-    lex -o build/lex.yy.c src/lexer.l
-    yacc -o build/y.tab.c -d src/parser.y
-    gcc -Wall -Wextra -o bin/compiler.exe build/lex.yy.c build/y.tab.c
-```
-
-## Running
-
-```shell
+    make
     ./bin/compiler.exe tests/source.c
 ```
 
