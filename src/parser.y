@@ -4,8 +4,6 @@
     int yyerror(const char *s) { fprintf(stderr, "Error: %s\n", s); return 1; }
     int yywrap() { return 1; }
     extern FILE *yyin;
-
-    // int yydebug = 1;
 %}
 
 %union
@@ -18,7 +16,7 @@
 
     /* Keywords. */
 %token CONST
-%token BOOL CHAR DOUBLE FLOAT INT LONG SHORT SIGNED UNSIGNED VOID
+%token BOOL CHAR DOUBLE FLOAT INT LONG SHORT SIGNED STRING UNSIGNED VOID
 %token BREAK CASE CONTINUE DEFAULT DO ELSE ENUM FOR IF RETURN SWITCH WHILE
 %token TRY CATCH FINALLY THROW
 
@@ -271,6 +269,7 @@ type_modifier           : BOOL
                         | LONG
                         | SHORT
                         | SIGNED
+                        | STRING
                         | UNSIGNED
                         | VOID
                         | enum_type
@@ -311,7 +310,7 @@ literal                 : FALSE
                         | INT_LITERAL
                         | FLOAT_LITERAL
                         | CHAR_LITERAL
-                        | STRING_LITERAL
+                        | STRING_LITERAL                        { free(yylval.stringValue); }
                         ;
 
 %%

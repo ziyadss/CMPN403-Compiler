@@ -4,16 +4,15 @@
 
 %option nounput noinput
 
-WS  [ \t\r\n]
 D   [0-9]
 H   [0-9a-fA-F]
 
 %%
 
     /* Comments and whitespace ignored. */
-\/\*(?:(?:\*[^\/])|[^*])*\*\/       ;
+\/\*((\*[^\/])|[^*])*\*\/           ;
 \/\/.*                              ;
-{WS}+                               ;
+[ \t\r\n]+                          ;
 
     /* Keywords. */
 "const"                             return CONST;
@@ -26,6 +25,7 @@ H   [0-9a-fA-F]
 "long"                              return LONG;
 "short"                             return SHORT;
 "signed"                            return SIGNED;
+"string"                            return STRING;
 "unsigned"                          return UNSIGNED;
 "void"                              return VOID;
 
@@ -102,21 +102,18 @@ H   [0-9a-fA-F]
 0[xX]{H}+                           { yylval.intValue = strtol(yytext, NULL, 16);       return INT_LITERAL; }
 
 {D}+[eE][+-]?{D}+                   { yylval.floatValue = strtod(yytext, NULL);         return FLOAT_LITERAL; }
-{D}+\.(?:[eE][+-]?{D}+)?            { yylval.floatValue = strtod(yytext, NULL);         return FLOAT_LITERAL; }
-{D}*\.{D}+(?:[eE][+-]?{D}+)?        { yylval.floatValue = strtod(yytext, NULL);         return FLOAT_LITERAL; }
+{D}+\.([eE][+-]?{D}+)?              { yylval.floatValue = strtod(yytext, NULL);         return FLOAT_LITERAL; }
+{D}*\.{D}+([eE][+-]?{D}+)?          { yylval.floatValue = strtod(yytext, NULL);         return FLOAT_LITERAL; }
 0[xX]{H}+\.?[pP][+-]?{H}+           { yylval.floatValue = strtod(yytext, NULL);         return FLOAT_LITERAL; }
 0[xX]{H}*\.{H}+[pP][+-]?{H}+        { yylval.floatValue = strtod(yytext, NULL);         return FLOAT_LITERAL; }
 
 \'[^']\'                            { yylval.charValue = yytext[1];                     return CHAR_LITERAL; }
 \"[^"]*\"                           { 
-                                        free(yylval.stringValue);
-                                        yylval.stringValue = malloc(yyleng);
-                                        strncpy(yylval.stringValue, yytext + 1, yyleng - 1);
-                                        yylval.stringValue[yyleng - 1] = '\0';
+                                        yylval.stringValue = malloc(yyleng);    // Freed after use in parser.
+                                        strncpy(yylval.stringValue, yytext + 1, yyleng - 2);
+                                        yylval.stringValue[yyleng - 2] = '\0';
                                                                                         return STRING_LITERAL;
-                                        // Check indices.
                                         // Do we need to do this, or is yytext validity time sufficient?
-                                        // Ask Abdo?
                                     }
     /* Identifier. */
 [a-zA-Z_][a-zA-Z0-9_]*              return IDENTIFIER;
