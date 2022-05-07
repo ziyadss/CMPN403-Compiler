@@ -5,7 +5,7 @@
     int yywrap() { return 1; }
     extern FILE *yyin;
 
-    int yydebug = 1;
+    // int yydebug = 1;
 %}
 
 %union
@@ -21,6 +21,10 @@
 %token BOOL CHAR DOUBLE FLOAT INT LONG SHORT SIGNED UNSIGNED VOID
 %token BREAK CASE CONTINUE DEFAULT DO ELSE ENUM FOR IF RETURN SWITCH WHILE
 %token TRY CATCH FINALLY THROW
+
+    /* To resolve dangling elses. */
+%nonassoc IF
+%nonassoc ELSE
 
     /* Operators. */
 %token COLON COMMA LBRACE LPAREN QUESTION RBRACE RPAREN SEMICOLON
@@ -205,8 +209,8 @@ block_item_list         : block_item_list statement
                         ;
 
     /* Selection statements are IFs and SWITCHes. */
-selection_statement     : IF LPAREN expression RPAREN statement ELSE statement
-                        | IF LPAREN expression RPAREN statement
+selection_statement     : IF LPAREN expression RPAREN statement %prec IF
+                        | IF LPAREN expression RPAREN statement ELSE statement
                         | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE
                         ;
 
@@ -235,18 +239,18 @@ jump_statement          : CONTINUE SEMICOLON
                         ;
 
     /* A try statement is a try block followed by one or more catch blocks, and an optional finally block. */
-try_statement           : TRY statement catch_block_list
-                        | TRY statement catch_block_list FINALLY statement
+try_statement           : TRY block_statement catch_block_list
+                        | TRY block_statement catch_block_list FINALLY block_statement
                         ;
 
     /* A catch block list is a sequence of CATCHes and statements, the last which can be a catch-all. */
-catch_block_list        : non_final_catch_block CATCH statement
+catch_block_list        : non_final_catch_block CATCH block_statement
                         | non_final_catch_block
-                        | CATCH statement
+                        | CATCH block_statement
                         ;
 
-non_final_catch_block   : non_final_catch_block CATCH LPAREN type_modifier_list IDENTIFIER RPAREN statement
-                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN statement
+non_final_catch_block   : non_final_catch_block CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement
+                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN block_statement
                         ;
 
     /* MISCELLANEOUS */
