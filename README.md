@@ -28,7 +28,7 @@ Currently in phase 1, this project consists of two phases:
 ## Running
 
 ```shell
-    ./bin/compiler.exe src/source.c
+    ./bin/compiler.exe tests/source.c
 ```
 
 ## Team Members
