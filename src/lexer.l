@@ -93,8 +93,8 @@ H   [0-9a-fA-F]
 "^"                                 return XOR;
 
     /* Boolean, numeric, character, and string literals. */
-"false"                             return FALSE;
-"true"                              return TRUE;
+"false"                             { yylval.boolValue = 0;                             return FALSE; }
+"true"                              { yylval.boolValue = 1;                             return TRUE;  }
 
 0[bB][01]+                          { yylval.intValue = strtol(yytext + 2, NULL, 2);    return INT_LITERAL; }
 0[0-7]*                             { yylval.intValue = strtol(yytext, NULL, 8);        return INT_LITERAL; }
@@ -114,6 +114,11 @@ H   [0-9a-fA-F]
                                         yylval.stringValue[yyleng - 2] = '\0';
                                                                                         return STRING_LITERAL;
                                         // Do we need to do this, or is yytext validity time sufficient?
+                                        // If we don't need, just do this.
+                                        // yytext[yyleng - 2] = '\0';
+                                        // yylval.stringValue =  yytext + 1;
+
+                                        // Possible solution: Insert into symbol table, at end, loop over it and free strings.
                                     }
     /* Identifier. */
 [a-zA-Z_][a-zA-Z0-9_]*              return IDENTIFIER;

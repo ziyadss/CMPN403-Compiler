@@ -12,6 +12,7 @@
     double floatValue;
     char charValue;
     char *stringValue;
+    _Bool boolValue;
 }
 
     /* Keywords. */
@@ -30,7 +31,7 @@
 %token ADD AND BIT_AND BIT_NOT BIT_OR DEC DIV EQ GE GT INC LE LT MOD MUL NE NOT OR SHL SHR SUB XOR
 
     /* Boolean, numeric, character, and string literals. */
-%token FALSE TRUE <intValue>INT_LITERAL <floatValue>FLOAT_LITERAL <charValue>CHAR_LITERAL <stringValue>STRING_LITERAL
+%token <boolValue>FALSE <boolValue>TRUE <intValue>INT_LITERAL <floatValue>FLOAT_LITERAL <charValue>CHAR_LITERAL <stringValue>STRING_LITERAL
 
     /* Identifier. */
 %token IDENTIFIER
@@ -304,13 +305,13 @@ assignment_op           : ADD_ASSIGN
                         | XOR_ASSIGN
                         ;
 
-    /* Literals. */
+    /* Literals. Default yacc action of `$$ = $1;` applies. */
 literal                 : FALSE
                         | TRUE
                         | INT_LITERAL
                         | FLOAT_LITERAL
                         | CHAR_LITERAL
-                        | STRING_LITERAL                        { free(yylval.stringValue); }
+                        | STRING_LITERAL
                         ;
 
 %%
