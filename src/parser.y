@@ -3,7 +3,6 @@
     int yylex();
     int yyerror(const char *s) { fprintf(stderr, "Error: %s\n", s); return 1; }
     int yywrap() { return 1; }
-    extern FILE *yyin;
 %}
 
 %union
@@ -315,25 +314,3 @@ literal                 : FALSE
                         ;
 
 %%
-
-int main(int argc, char** argv)
-{
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
-        return 1;
-    }
-
-    yyin = fopen(argv[1], "r");
-    if (yyin == NULL)
-    {
-        fprintf(stderr, "Error: Could not open file %s\n", argv[1]);
-        return 1;
-    }
-
-    yyparse();
-
-    fclose(yyin);
-
-    return 0;
-}
