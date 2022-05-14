@@ -10,6 +10,7 @@ H   [0-9a-fA-F]
 %%
 
     /* Comments and whitespace ignored. */
+    /* TODO: Fix comments ending with '**\/' not ending. */
 \/\*((\*[^\/])|[^*])*\*\/           ;
 \/\/.*                              ;
 [ \t\r\n]+                          ;
