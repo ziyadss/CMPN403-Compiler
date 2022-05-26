@@ -1,3 +1,4 @@
+.PHONY: build
 build:
 	mkdir -p build bin
 	lex -o build/lex.yy.c src/lexer.l
