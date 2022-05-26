@@ -1,5 +1,6 @@
 #define ST_ARRAY_SIZE 1
 
+#include <stdlib.h>
 #include <string.h>
 
 enum SyntaxError
@@ -30,11 +31,12 @@ unsigned int hash(char *string)
 
 _Bool search(struct SymbolTableEntry *node, char *identifier)
 {
-    do
+    while (node != NULL)
     {
         if (strcmp(node->identifier, identifier) == 0)
             return 1;
-    } while (node = node->next);
+        node = node->next;
+    }
 
     return 0;
 }
@@ -58,6 +60,15 @@ int insert(struct SymbolTable *table, char *identifier)
 
 static struct SymbolTable *current_scope;
 
+struct SymbolTable *create_table()
+{
+    struct SymbolTable *table = malloc(sizeof(*table));
+    table->parent = NULL;
+    for (int i = 0; i < ST_ARRAY_SIZE; i++)
+        table->buckets[i] = NULL;
+    return table;
+}
+
 int destroy_table(struct SymbolTable *table)
 {
     // destroy the buckets
@@ -66,7 +77,7 @@ int destroy_table(struct SymbolTable *table)
 
 int scope_down()
 {
-    struct SymbolTable *new_scope = malloc(sizeof(*new_scope));
+    struct SymbolTable *new_scope = create_table();
     new_scope->parent = current_scope;
     current_scope = new_scope;
 }
@@ -78,23 +89,27 @@ int scope_up()
     destroy_table(old_scope);
 }
 
+#include <stdio.h>
 int main()
 {
-    current_scope = malloc(sizeof(*current_scope));
+    current_scope = create_table();
 
     int result;
     result = insert(current_scope, "Variable1");
     // result should be NO_ERROR
+    printf("Result is %d, should be %d\n", result, NO_ERROR);
 
     scope_down();
 
     result = insert(current_scope, "Variable1");
     // result should be NO_ERROR
+    printf("Result is %d, should be %d\n", result, NO_ERROR);
 
     scope_up();
 
     result = insert(current_scope, "Variable1");
     // result should be USED_IDENTIFIER
+    printf("Result is %d, should be %d\n", result, USED_IDENTIFIER);
 
     destroy_table(current_scope);
 
@@ -110,5 +125,3 @@ int main()
 // TODO: SymbolTableEntry properties
 
 // TODO: destroy_table logic
-
-// TODO: Try running the current main function, it's untested so far.
