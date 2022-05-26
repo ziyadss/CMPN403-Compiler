@@ -122,12 +122,7 @@ H   [0-9a-fA-F]
                                         // Possible solution: Insert into symbol table, at end, loop over it and free strings.
                                     }
     /* Identifier. */
-[a-zA-Z_][a-zA-Z0-9_]*              { 
-                                        yylval.stringValue = malloc(yyleng);
-                                        strncpy(yylval.stringValue, yytext + 1, yyleng - 2);
-                                        yylval.stringValue[yyleng - 2] = '\0';
-                                                                                        return IDENTIFIER;
-                                    }
+[a-zA-Z_][a-zA-Z0-9_]*              return IDENTIFIER;
 
 .                                   printf("Unmatched: '%s'\n", yytext);
 
