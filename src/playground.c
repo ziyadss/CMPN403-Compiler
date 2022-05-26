@@ -90,28 +90,29 @@ int scope_up()
 }
 
 #include <stdio.h>
+#include <assert.h>
+
 int main()
 {
     current_scope = create_table();
 
     int result;
     result = insert(current_scope, "Variable1");
-    // result should be NO_ERROR
-    printf("Result is %d, should be %d\n", result, NO_ERROR);
+    assert(result == NO_ERROR);
 
     scope_down();
 
     result = insert(current_scope, "Variable1");
-    // result should be NO_ERROR
-    printf("Result is %d, should be %d\n", result, NO_ERROR);
+    assert(result == NO_ERROR);
 
     scope_up();
 
     result = insert(current_scope, "Variable1");
-    // result should be USED_IDENTIFIER
-    printf("Result is %d, should be %d\n", result, USED_IDENTIFIER);
+    assert(result == USED_IDENTIFIER);
 
     destroy_table(current_scope);
+
+    printf("All tests passed.\n");
 
     return 0;
 }
