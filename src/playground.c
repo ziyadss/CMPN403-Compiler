@@ -17,10 +17,9 @@ struct SymbolTable
         /* ... */
 
         struct SymbolTableEntry *next;
-    };
+    } *buckets[ST_ARRAY_SIZE];
 
     struct SymbolTable *parent;
-    struct SymbolTableEntry *buckets[ST_ARRAY_SIZE];
 };
 
 unsigned int hash(char *string)
@@ -71,7 +70,11 @@ struct SymbolTable *create_table()
 
 int destroy_table(struct SymbolTable *table)
 {
-    // destroy the buckets
+	struct SymbolTableEntry** entries = table->buckets;
+
+	for (int i = 0; i < ST_ARRAY_SIZE; ++i)
+		free(entries[i]);
+
     free(table);
 }
 
