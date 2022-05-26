@@ -9,12 +9,40 @@ enum SyntaxError
     USED_IDENTIFIER
 };
 
+enum KIND {
+	FUNCT,
+	PAR,
+	VAR
+};
+
+enum MODIFIER {
+	AUTO,
+	CONST,
+	STATIC,
+	UNSIGNED,
+	NONE
+};
+
+enum TYPE {
+	BOOL,
+	CHAR,
+	DOUBLE,
+	FLOAT,
+	INT,
+	LONG,
+	SHORT,
+	STRING,
+	VOID
+};
+
 struct SymbolTable
 {
     struct SymbolTableEntry
     {
         char *identifier;
-        /* ... */
+		//KIND kind;
+		//type
+		//MODIFIER modifier;
 
         struct SymbolTableEntry *next;
     } *buckets[ST_ARRAY_SIZE];
@@ -73,7 +101,16 @@ int destroy_table(struct SymbolTable *table)
 	struct SymbolTableEntry** entries = table->buckets;
 
 	for (int i = 0; i < ST_ARRAY_SIZE; ++i)
+	{
+		while (entries[i]->next != NULL)
+		{
+			struct SymbolTableEntry** tmp = entries;
+			entries[i] = entries[i]->next;
+			free(tmp);
+		}
 		free(entries[i]);
+	}
+
 
     free(table);
 }
