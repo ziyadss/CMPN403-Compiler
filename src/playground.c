@@ -1,4 +1,6 @@
 #define ST_ARRAY_SIZE 1
+#define HASHING_P 67
+#define HASHING_M 
 
 #include <assert.h>
 #include <stdio.h>
@@ -113,7 +115,7 @@ void destroy_table(struct SymbolTable *table)
     {
         while (entries[i]->next != NULL)
         {
-            struct SymbolTableEntry **tmp = entries;
+            struct SymbolTableEntry *tmp = entries[i];
             entries[i] = entries[i]->next;
             free(tmp);
         }
