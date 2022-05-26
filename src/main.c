@@ -11,8 +11,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    yyin = fopen(argv[1], "r");
-    if (yyin == NULL)
+    if (fopen_s(&yyin, argv[1], "r") != 0)
     {
         fprintf(stderr, "Error: Could not open file %s\n", argv[1]);
         return 1;
