@@ -7,6 +7,27 @@ enum SyntaxError
 
 extern struct SymbolTable *current_scope;
 
+void print_table(unsigned int line)
+{
+    struct SymbolTable *table = current_scope;
+    printf_s("\nAt line %d, current table: ", line);
+    while (table != NULL)
+    {
+        for (int i = 0; i < ST_ARRAY_SIZE; i++)
+        {
+            struct SymbolTableEntry *head = table->buckets[i];
+            while (head != NULL)
+            {
+                printf_s("%s, ", head->identifier);
+                head = head->next;
+            }
+        }
+        printf_s("\nParent: ");
+        table = table->parent;
+    }
+    printf_s("NULL\n\n");
+}
+
 enum SyntaxError insert(char *identifier)
 {
     unsigned int bucket = hash(identifier);

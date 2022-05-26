@@ -6,6 +6,7 @@
     int yylex();
     int yyerror(const char *s) { fprintf_s(stderr, "Error: %s\n", s); return 1; }
     int yywrap() { return 1; }
+    extern int yylineno;
 %}
 
 %union
@@ -61,8 +62,8 @@ initializer_list        : initializer_list COMMA initializer
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression
-                        | IDENTIFIER
+initializer             : IDENTIFIER ASSIGN assign_expression   { insert($1); print_table(yylineno); }
+                        | IDENTIFIER                            { insert($1); print_table(yylineno); }
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */

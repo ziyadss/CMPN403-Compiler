@@ -3,6 +3,7 @@
 %}
 
 %option nounput noinput
+%option yylineno
 
 D   [0-9]
 H   [0-9a-fA-F]
