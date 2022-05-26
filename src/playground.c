@@ -3,31 +3,17 @@
 
 enum KIND
 {
-    FUNCT,
-    PAR,
-    VAR
+    FUNC, PAR, VAR
 };
 
 enum MODIFIER
 {
-    AUTO,
-    CONST,
-    STATIC,
-    UNSIGNED,
-    NONE
+    AUTO, CONST, STATIC, UNSIGNED, NONE
 };
 
 enum TYPE
 {
-    BOOL,
-    CHAR,
-    DOUBLE,
-    FLOAT,
-    INT,
-    LONG,
-    SHORT,
-    STRING,
-    VOID
+    BOOL, CHAR, DOUBLE, FLOAT, INT, LONG, SHORT, STRING, VOID
 };
 
 int main()

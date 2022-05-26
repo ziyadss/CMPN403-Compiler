@@ -2,8 +2,7 @@
 
 enum SyntaxError
 {
-    NO_ERROR,
-    USED_IDENTIFIER
+    NO_ERROR, USED_IDENTIFIER
 };
 
 extern struct SymbolTable *current_scope;
