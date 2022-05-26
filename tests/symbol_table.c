@@ -6,7 +6,7 @@ struct SymbolTable *current_scope = NULL;
 
 int main()
 {
-    current_scope = create_table();
+    scope_down();
 
     int result;
     result = insert(current_scope, "Variable1");
@@ -22,7 +22,7 @@ int main()
     result = insert(current_scope, "Variable1");
     assert(result == USED_IDENTIFIER);
 
-    destroy_table(current_scope);
+    scope_up();
 
     printf("All tests passed.\n");
 
