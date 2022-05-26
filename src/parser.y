@@ -73,8 +73,13 @@ function                : type_modifier_list IDENTIFIER LPAREN parameter_list RP
                         ;
 
     /* A parameter list is a comma-separated list of parameters. */
-parameter_list          : parameter_list COMMA declaration
-                        | declaration
+parameter_list          : parameter_list COMMA parameter
+                        | parameter
+                        ;
+
+    /* A parameter is a type, and an optional initializer. */
+parameter               : type_modifier_list initializer
+                        | type_modifier_list
                         ;
 
     /* EXPRESSIONS */
