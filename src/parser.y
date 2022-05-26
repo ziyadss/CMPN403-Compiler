@@ -1,7 +1,10 @@
 %{
     #include <stdio.h>
+
+    #include "../src/symbol_table_interface.c"
+
     int yylex();
-    int yyerror(const char *s) { fprintf(stderr, "Error: %s\n", s); return 1; }
+    int yyerror(const char *s) { fprintf_s(stderr, "Error: %s\n", s); return 1; }
     int yywrap() { return 1; }
 %}
 
@@ -33,7 +36,7 @@
 %token <boolValue>FALSE <boolValue>TRUE <intValue>INT_LITERAL <floatValue>FLOAT_LITERAL <charValue>CHAR_LITERAL <stringValue>STRING_LITERAL
 
     /* Identifier. */
-%token IDENTIFIER
+%token <stringValue>IDENTIFIER
 
 %%
 
@@ -197,7 +200,7 @@ statement               : block_statement
                         ;
 
     /* A block statement is a brace-enclosed list of optional block items. */
-block_statement         : LBRACE block_item_list RBRACE
+block_statement         : LBRACE { scope_down(); } block_item_list { scope_up(); } RBRACE
                         | LBRACE RBRACE
                         ;
 
