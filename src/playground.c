@@ -4,6 +4,7 @@
 
 enum SyntaxError
 {
+    NO_ERROR,
     USED_IDENTIFIER
 };
 
@@ -52,12 +53,12 @@ int insert(struct SymbolTable *table, char *identifier)
 
     table->buckets[bucket] = entry;
 
-    return 0;
+    return NO_ERROR;
 }
 
-static struct SymbolTable* current_scope;
+static struct SymbolTable *current_scope;
 
-int destroy_table(struct SymbolTable* table)
+int destroy_table(struct SymbolTable *table)
 {
     // destroy the buckets
     free(table);
@@ -65,21 +66,39 @@ int destroy_table(struct SymbolTable* table)
 
 int scope_down()
 {
-    struct SymbolTable* new_scope = malloc(sizeof(*new_scope));
+    struct SymbolTable *new_scope = malloc(sizeof(*new_scope));
     new_scope->parent = current_scope;
     current_scope = new_scope;
 }
 
 int scope_up()
 {
-    struct SymbolTable* old_scope = current_scope;
+    struct SymbolTable *old_scope = current_scope;
     current_scope = old_scope->parent;
     destroy_table(old_scope);
 }
 
 int main()
 {
+    current_scope = malloc(sizeof(*current_scope));
 
+    int result;
+    result = insert(current_scope, "Variable1");
+    // result should be NO_ERROR
+
+    scope_down();
+
+    result = insert(current_scope, "Variable1");
+    // result should be NO_ERROR
+
+    scope_up();
+
+    result = insert(current_scope, "Variable1");
+    // result should be USED_IDENTIFIER
+
+    destroy_table(current_scope);
+
+    return 0;
 }
 
 // TODO: A search function that searches in the table, if not found in its parent, etc etc. It calls the currently
@@ -89,3 +108,7 @@ int main()
 //  Note that ST_ARRAY_SIZE is currently set to 1 so that there is only one bucket.
 
 // TODO: SymbolTableEntry properties
+
+// TODO: destroy_table logic
+
+// TODO: Try running the current main function, it's untested so far.
