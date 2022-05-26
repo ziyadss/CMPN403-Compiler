@@ -76,19 +76,17 @@ struct SymbolTable *create_table()
 
 void destroy_table(struct SymbolTable *table)
 {
-    struct SymbolTableEntry **entries = table->buckets;
-
-    for (int i = 0; i < ST_ARRAY_SIZE; ++i)
+    for (int i = 0; i < ST_ARRAY_SIZE; i++)
     {
-        while (entries[i]->next != NULL)
+        struct SymbolTableEntry *head = table->buckets[i];
+        while (head != NULL)
         {
-            struct SymbolTableEntry *tmp = entries[i];
-            entries[i] = entries[i]->next;
-            free(tmp);
+            struct SymbolTableEntry *next = head->next;
+            free(head);
+            head = next;
         }
-        free(entries[i]);
     }
-
+    
     free(table);
 }
 
