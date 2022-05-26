@@ -3,6 +3,15 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#define STB_DS_IMPLEMENTATION
+#include "stb_ds.h"
+
+//template el ghalaba - abdo
+#define MAP_KV(T, Name) 	\
+typedef struct Map_##Name { \
+	char *key;				\
+	T value;				\
+} Map_##Name##_El, *Map_##Name
 
 struct SymbolTableEntry
 {
@@ -66,10 +75,15 @@ void destroy_table(struct SymbolTable *table)
     free(table);
 }
 
-// TODO: A search function that searches in the table, if not found in its parent, etc etc. It calls the currently
-//  implemented search function for the one correct bucket in each table.
+// TODO: A search function that searches in the table, if not found in its parent, etc etc. It calls the currently //  implemented search function for the one correct bucket in each table.
+// scope up returns a symboltable with an array of STEs, where STEs are ordered from the top of the scope to the bottom of the scope
+// counter example: a parent scope that continues after a child scope will return a match if the declaration is found in the bottom half of the parent scope 
+// which is obviously wrong
+//
+// TODO: scope insertion
 
 // TODO: A hash function that produces the same hash for identical strings.
 //  Note that ST_ARRAY_SIZE is currently set to 1 so that there is only one bucket.
+//  IMPORTANT: DONE***********
 
 // TODO: SymbolTableEntry properties
