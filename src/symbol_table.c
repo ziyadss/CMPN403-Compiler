@@ -4,15 +4,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct SymbolTableEntry
+{
+    char *identifier;
+    /* ... */
+
+    struct SymbolTableEntry *next;
+};
+
 struct SymbolTable
 {
-    struct SymbolTableEntry
-    {
-        char *identifier;
-        /* ... */
-
-        struct SymbolTableEntry *next;
-    } * buckets[ST_ARRAY_SIZE];
+    struct SymbolTableEntry *buckets[ST_ARRAY_SIZE];
 
     struct SymbolTable *parent;
 };
