@@ -1,5 +1,5 @@
 #define HASHING_P 67
-#define HASHING_M
+#define HASHING_M 1000000009
 
 enum KIND
 {
