@@ -12,7 +12,7 @@ enum SyntaxError insert(struct SymbolTable *table, char *identifier)
     unsigned int bucket = hash(identifier);
     struct SymbolTableEntry *head = table->buckets[bucket];
 
-    if (search(head, identifier) != NULL)
+    if (search_bucket(head, identifier) != NULL)
         return USED_IDENTIFIER;
 
     struct SymbolTableEntry *entry = malloc(sizeof(*entry));

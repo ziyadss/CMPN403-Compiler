@@ -35,13 +35,28 @@ unsigned int hash(char *string)
     return strlen(string) % ST_ARRAY_SIZE;
 }
 
-struct SymbolTableEntry *search(struct SymbolTableEntry *node, char *identifier)
+struct SymbolTableEntry *search_bucket(struct SymbolTableEntry *node, char *identifier)
 {
     while (node != NULL)
     {
         if (strcmp(node->identifier, identifier) == 0)
             return node;
         node = node->next;
+    }
+
+    return NULL;
+}
+
+struct SymbolTableEntry *search_tables(struct SymbolTable *table, char *identifier)
+{
+    unsigned int bucket = hash(identifier);
+
+    while (table != NULL)
+    {
+        struct SymbolTableEntry *entry = search_bucket(table->buckets[bucket], identifier);
+        if (entry != NULL)
+            return entry;
+        table = table->parent;
     }
 
     return NULL;
@@ -77,15 +92,7 @@ void destroy_table(struct SymbolTable *table)
     free(table);
 }
 
-// TODO: A search function that searches in the table, if not found in its parent, etc etc. It calls the currently //  implemented search function for the one correct bucket in each table.
-// scope up returns a symboltable with an array of STEs, where STEs are ordered from the top of the scope to the bottom of the scope
-// counter example: a parent scope that continues after a child scope will return a match if the declaration is found in the bottom half of the parent scope
-// which is obviously wrong
-//
-// TODO: scope insertion
-
 // TODO: A hash function that produces the same hash for identical strings.
 //  Note that ST_ARRAY_SIZE is currently set to 1 so that there is only one bucket.
-//  IMPORTANT: DONE***********
 
 // TODO: SymbolTableEntry properties
