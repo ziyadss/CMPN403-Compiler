@@ -6,9 +6,10 @@ struct SymbolTable *current_scope = NULL;
 
 int main()
 {
+    int result;
+
     scope_down();
 
-    int result;
     result = insert(current_scope, "Variable1");
     assert(result == NO_ERROR);
 
