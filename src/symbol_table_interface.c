@@ -7,10 +7,10 @@ enum SyntaxError
 
 extern struct SymbolTable *current_scope;
 
-enum SyntaxError insert(struct SymbolTable *table, char *identifier)
+enum SyntaxError insert(char *identifier)
 {
     unsigned int bucket = hash(identifier);
-    struct SymbolTableEntry *head = table->buckets[bucket];
+    struct SymbolTableEntry *head = current_scope->buckets[bucket];
 
     if (search_bucket(head, identifier) != NULL)
         return USED_IDENTIFIER;
@@ -21,7 +21,7 @@ enum SyntaxError insert(struct SymbolTable *table, char *identifier)
     entry->identifier = identifier;
     entry->next = head;
 
-    table->buckets[bucket] = entry;
+    current_scope->buckets[bucket] = entry;
 
     return NO_ERROR;
 }

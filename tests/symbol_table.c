@@ -10,17 +10,20 @@ int main()
 
     scope_down();
 
-    result = insert(current_scope, "Variable1");
+    result = insert("Variable1");
     assert(result == NO_ERROR);
 
     scope_down();
 
-    result = insert(current_scope, "Variable1");
+    result = insert("Variable1");
+    assert(result == NO_ERROR);
+
+    result = insert("Variable2");
     assert(result == NO_ERROR);
 
     scope_up();
 
-    result = insert(current_scope, "Variable1");
+    result = insert("Variable1");
     assert(result == USED_IDENTIFIER);
 
     scope_up();
