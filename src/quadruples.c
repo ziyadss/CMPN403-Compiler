@@ -8,9 +8,9 @@ FILE *output_file = NULL;
 char *_operation(struct AST_Node *operation);
 char *_block(struct AST_Node *block);
 
-char *_statement(struct AST_Node *statement)
+char *_node(struct AST_Node *statement)
 {
-    char *ret;
+    char *ret = NULL;
     switch (statement->tag)
     {
     case NODE_TYPE_STATEMENTS:
@@ -38,8 +38,8 @@ char *_statement(struct AST_Node *statement)
         ret = statement->boolValue ? "1" : "0";
         break;
     default:
-        ret = NULL;
         fprintf_s(stderr, "Invalid statement: %d\n", statement->tag);
+        break;
     }
     return ret;
 }
@@ -47,36 +47,76 @@ char *_statement(struct AST_Node *statement)
 char *_block(struct AST_Node *block)
 {
     for (unsigned int i = 0; i < block->statements_count; i++)
-        _statement(block->statements[i]);
+        _node(block->statements[i]);
+
     return NULL;
+}
+
+void _parameters(struct AST_Node *declarations)
+{
+    
+}
+
+void _operation_dst(char *identifier, struct AST_Node *operation)
+{
+    switch (operation->op)
+    {
+    case TERNARY_OP:
+        break;
+    case COMMA_OP:
+        break;
+    case CALL_OP:
+        fprintf_s(output_file, "CALL %s\n", operation->left->identifier);
+        _parameters(operation->right);
+        fprintf_s(output_file, "MOV %s, retval\n", identifier);
+        break;
+    case ASSIGN_OP:
+        fprintf_s(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right));
+        break;
+    case ADD_OP:
+        fprintf_s(output_file, "ADD %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    default:
+        fprintf_s(output_file, "UNDEF_OP %s, %s\n", "target", "val");
+        break;
+    }
 }
 
 char *_operation(struct AST_Node *operation)
 {
-    char *ret;
+    char *ret = NULL;
     switch (operation->op)
     {
-    case FUNC_DECL:
-        fprintf_s(output_file, "%s: \n", operation->left->identifier);
-        _block(operation->right);
-        fprintf_s(output_file, "RET\n");
-        ret = NULL;
+    case FUNC_DEF:
+        if (operation->right != NULL)
+        {
+            fprintf_s(output_file, "%s: \n", operation->left->identifier);
+            _block(operation->right);
+            fprintf_s(output_file, "RET\n");
+        }
         break;
-
-    case ASSIGN_OP:
-        char *src = _statement(operation->right);
-        fprintf_s(output_file, "MOV %s, %s\n", operation->left->identifier, src);
-        ret = operation->left->identifier;
+    case TERNARY_OP:
         break;
-
+    case COMMA_OP:
+        break;
     case CALL_OP:
         fprintf_s(output_file, "CALL %s\n", operation->left->identifier);
         ret = "t";
         break;
+    case ASSIGN_OP:
+        if (operation->right->tag == NODE_TYPE_OPERATION)
+            _operation_dst(operation->left->identifier, operation->right);
+        else
+            fprintf_s(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right));
 
+        ret = operation->left->identifier;
+        break;
+    case ADD_OP:
+        ret = "temp";
+        fprintf_s(output_file, "ADD %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
     default:
-        fprintf_s(output_file, "OP %s, %s\n", "target", "val");
-        ret = NULL;
+        fprintf_s(output_file, "UNDEF_OP %s, %s\n", "target", "val");
         break;
     }
     return ret;
