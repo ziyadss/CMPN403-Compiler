@@ -5,7 +5,7 @@
 
 enum OPERATION
 {
-    FUNC_DECL,
+    FUNC_DEF,
     TERNARY_OP,
     COMMA_OP,
     CALL_OP,

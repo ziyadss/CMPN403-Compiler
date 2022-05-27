@@ -52,7 +52,9 @@
 
 %type <nodePointer>initializer initializer_list function top_level_statement declaration
 %type <nodePointer>function_start function_start_par function_start_no_par
-%type <nodePointer> block_statement block_item_list statement 
+%type <nodePointer>block_statement block_item_list statement 
+
+%type <nodePointer>jump_statement
 // selection_statement iteration_statement jump_statement try_statement
 
 %%
@@ -78,13 +80,13 @@ initializer_list        : initializer_list COMMA initializer        { $$ = opera
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { insert($1); $$ = operation_node(ASSIGN_OP, identifier_node($1), $3); }
-                        | IDENTIFIER                                { insert($1); $$ = identifier_node($1); }
+initializer             : IDENTIFIER ASSIGN assign_expression       { insert($1, 0, 1, 0); $$ = operation_node(ASSIGN_OP, identifier_node($1), $3); }
+                        | IDENTIFIER                                { insert($1, 0, 0, 0); $$ = identifier_node($1); }
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
 
-function_start          : type_modifier_list IDENTIFIER { insert($2); } LPAREN      {$$ = identifier_node($2);}
+function_start          : type_modifier_list IDENTIFIER LPAREN      {$$ = identifier_node($2);}
                         ;
 
 function_start_par      : function_start { scope_down(); } parameter_list RPAREN
@@ -93,10 +95,10 @@ function_start_par      : function_start { scope_down(); } parameter_list RPAREN
 function_start_no_par   : function_start RPAREN
                         ;
 
-function                : function_start_par block_statement                        { scope_up(); $$ = operation_node(FUNC_DECL, $1, $2);}
-                        | function_start_no_par { scope_down(); } block_statement   { scope_up(); $$ = operation_node(FUNC_DECL, $1, $3);}
-                        | function_start_par RPAREN SEMICOLON                       { scope_up(); $$ = operation_node(FUNC_DECL, $1, NULL);}
-                        | function_start_no_par SEMICOLON                           { $$ = operation_node(FUNC_DECL, $1, NULL);}
+function                : function_start_par block_statement                        { insert($1->identifier, 1, 1, 1); scope_up(); $$ = operation_node(FUNC_DEF, $1, $2);}
+                        | function_start_no_par { scope_down(); } block_statement   { insert($1->identifier, 1, 1, 1); scope_up(); $$ = operation_node(FUNC_DEF, $1, $3);}
+                        | function_start_par RPAREN SEMICOLON                       { insert($1->identifier, 1, 0, 1); scope_up(); $$ = operation_node(FUNC_DEF, $1, NULL);}
+                        | function_start_no_par SEMICOLON                           { insert($1->identifier, 1, 0, 1); $$ = operation_node(FUNC_DEF, $1, NULL);}
                         ;
 
     /* A parameter list is a comma-separated list of parameters. */
@@ -220,8 +222,8 @@ optional_expression     : expression
 statement               : { scope_down();} block_statement  { scope_up(); $$ = $2; }
                         | selection_statement               {$$ = NULL;}
                         | iteration_statement               {$$ = NULL;}
-                        | jump_statement                    {$$ = NULL;}
                         | try_statement                     {$$ = NULL;}
+                        | jump_statement
                         | optional_expression SEMICOLON
                         | declaration SEMICOLON
                         ;
@@ -260,10 +262,10 @@ iteration_statement     : WHILE LPAREN expression RPAREN statement
                         ;
 
     /* Jump statements are ones which affect control flow. */
-jump_statement          : CONTINUE SEMICOLON
-                        | BREAK SEMICOLON
-                        | RETURN optional_expression SEMICOLON
-                        | THROW optional_expression SEMICOLON
+jump_statement          : CONTINUE SEMICOLON                                {$$ = NULL;}
+                        | BREAK SEMICOLON                                   {$$ = NULL;}
+                        | RETURN optional_expression SEMICOLON              {$$ = operation_node(ASSIGN_OP, identifier_node("retval"), $2);}
+                        | THROW optional_expression SEMICOLON               {$$ = $2;}
                         ;
 
     /* A try statement is a try block followed by one or more catch blocks, and an optional finally block. */
