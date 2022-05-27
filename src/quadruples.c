@@ -52,11 +52,6 @@ char *_block(struct AST_Node *block)
     return NULL;
 }
 
-void _parameters(struct AST_Node *declarations)
-{
-    
-}
-
 void _operation_dst(char *identifier, struct AST_Node *operation)
 {
     switch (operation->op)
@@ -67,7 +62,7 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         break;
     case CALL_OP:
         fprintf_s(output_file, "CALL %s\n", operation->left->identifier);
-        _parameters(operation->right);
+        // _parameters(operation->right); BLOCK?? PARA??
         fprintf_s(output_file, "MOV %s, retval\n", identifier);
         break;
     case ASSIGN_OP:
@@ -87,14 +82,6 @@ char *_operation(struct AST_Node *operation)
     char *ret = NULL;
     switch (operation->op)
     {
-    case FUNC_DEF:
-        if (operation->right != NULL)
-        {
-            fprintf_s(output_file, "%s: \n", operation->left->identifier);
-            _block(operation->right);
-            fprintf_s(output_file, "RET\n");
-        }
-        break;
     case TERNARY_OP:
         break;
     case COMMA_OP:
@@ -108,7 +95,6 @@ char *_operation(struct AST_Node *operation)
             _operation_dst(operation->left->identifier, operation->right);
         else
             fprintf_s(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right));
-
         ret = operation->left->identifier;
         break;
     case ADD_OP:
@@ -130,8 +116,21 @@ void quadruples(char *filename)
     for (unsigned int i = 0; i < program->statements_count; i++)
     {
         struct AST_Node *node = program->statements[i];
-        assert(node->tag == NODE_TYPE_OPERATION);
-        _operation(node);
+        switch (node->tag)
+        {
+        case NODE_TYPE_STATEMENTS:
+            _operation(node);
+            break;
+        case NODE_TYPE_FUNC_DEF:
+            fprintf_s(output_file, "%s: \n", node->identifier);
+            // parameters? node->left
+            _block(node->right);
+            fprintf_s(output_file, "RET\n");
+            break;
+        default:
+            fprintf_s(stderr, "Invalid top level statement: %d\n", node->tag);
+            break;
+        }
         fprintf_s(output_file, "\n");
     }
 

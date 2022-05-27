@@ -51,9 +51,10 @@
 %type <operation>unary_op assignment_op
 
 %type <nodePointer>initializer initializer_list function top_level_statement declaration
-%type <nodePointer>function_start function_start_par function_start_no_par
 %type <nodePointer>block_statement block_item_list statement 
 
+%type <nodePointer>parameter parameter_list
+%type <stringValue>function_declaration parameterized_identifier
 %type <nodePointer>jump_statement
 // selection_statement iteration_statement jump_statement try_statement
 
@@ -86,29 +87,26 @@ initializer             : IDENTIFIER ASSIGN assign_expression       { insert($1,
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
 
-function_start          : type_modifier_list IDENTIFIER LPAREN      {$$ = identifier_node($2);}
+parameterized_identifier: type_modifier_list IDENTIFIER LPAREN              { scope_down(); $$ = $2; }
                         ;
 
-function_start_par      : function_start { scope_down(); } parameter_list RPAREN
+function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN       { $$ = $2; }
                         ;
 
-function_start_no_par   : function_start RPAREN
-                        ;
-
-function                : function_start_par block_statement                        { insert($1->identifier, 1, 1, 1); scope_up(); $$ = operation_node(FUNC_DEF, $1, $2);}
-                        | function_start_no_par { scope_down(); } block_statement   { insert($1->identifier, 1, 1, 1); scope_up(); $$ = operation_node(FUNC_DEF, $1, $3);}
-                        | function_start_par RPAREN SEMICOLON                       { insert($1->identifier, 1, 0, 1); scope_up(); $$ = operation_node(FUNC_DEF, $1, NULL);}
-                        | function_start_no_par SEMICOLON                           { insert($1->identifier, 1, 0, 1); $$ = operation_node(FUNC_DEF, $1, NULL);}
+function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); identifier_node($1); insert($1, 1, 1, 1); $$ = function_node($1, $2, $4); }
+                        | function_declaration { scope_down(); } block_statement            { scope_up(); identifier_node($1); insert($1, 1, 1, 1); $$ = function_node($1, NULL, $3); }
+                        | parameterized_identifier parameter_list RPAREN RPAREN SEMICOLON   { scope_up(); identifier_node($1); insert($1, 1, 0, 1); $$ = function_node($1, $2, NULL); }
+                        | function_declaration SEMICOLON                                    {             identifier_node($1); insert($1, 1, 0, 1); $$ = function_node($1, NULL, NULL); }
                         ;
 
     /* A parameter list is a comma-separated list of parameters. */
-parameter_list          : parameter_list COMMA parameter
+parameter_list          : parameter_list COMMA parameter                                { $$ = operation_node(COMMA_OP, $1, $3); }
                         | parameter
                         ;
 
     /* A parameter is a type, and an optional initializer. */
-parameter               : type_modifier_list initializer
-                        | type_modifier_list
+parameter               : type_modifier_list initializer                                { $$ = $2; }
+                        | type_modifier_list                                            { $$ = NULL; }
                         ;
 
     /* EXPRESSIONS */

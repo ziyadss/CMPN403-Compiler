@@ -5,7 +5,6 @@
 
 enum OPERATION
 {
-    FUNC_DEF,
     TERNARY_OP,
     COMMA_OP,
     CALL_OP,
@@ -46,6 +45,7 @@ enum OPERATION
 
 enum NODE_TYPE
 {
+    NODE_TYPE_FUNC_DEF,
     NODE_TYPE_STATEMENTS,
     NODE_TYPE_OPERATION,
     NODE_TYPE_IDENTIFIER,
@@ -60,27 +60,26 @@ struct AST_Node
 {
     union
     {
-        struct
+        struct statements
         {
             unsigned int statements_count, statements_capacity;
             struct AST_Node **statements;
         };
 
-        struct
+        struct operation
         {
             enum OPERATION op;
             struct AST_Node *left;
             struct AST_Node *right;
         };
 
-        char *identifier;
         int intValue;
         double floatValue;
         char charValue;
         char *stringValue;
         _Bool boolValue;
     };
-
+    char *identifier;
     enum NODE_TYPE tag;
 };
 
@@ -158,6 +157,16 @@ struct AST_Node *block_node(struct AST_Node *statement)
     node->statements = malloc(sizeof(*node->statements) * node->statements_capacity);
     assert(node->statements != NULL);
     node->statements[0] = statement;
+    return node;
+}
+
+struct AST_Node *function_node(char *identifier, struct AST_Node *parameters, struct AST_Node *statements)
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_FUNC_DEF;
+    node->identifier = identifier;
+    node->left = parameters;
+    node->right = statements;
     return node;
 }
 
