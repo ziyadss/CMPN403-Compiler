@@ -87,10 +87,10 @@ initializer             : IDENTIFIER ASSIGN assign_expression       { insert($1,
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
 
-parameterized_identifier: type_modifier_list IDENTIFIER LPAREN              { scope_down(); $$ = $2; }
+parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { scope_down(); $$ = $2; }
                         ;
 
-function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN       { $$ = $2; }
+function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = $2; }
                         ;
 
 function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); identifier_node($1); insert($1, 1, 1, 1); $$ = function_node($1, $2, $4); }
@@ -100,13 +100,13 @@ function                : parameterized_identifier parameter_list RPAREN block_s
                         ;
 
     /* A parameter list is a comma-separated list of parameters. */
-parameter_list          : parameter_list COMMA parameter                                { $$ = operation_node(COMMA_OP, $1, $3); }
+parameter_list          : parameter_list COMMA parameter                                    { $$ = operation_node(COMMA_OP, $1, $3); }
                         | parameter
                         ;
 
     /* A parameter is a type, and an optional initializer. */
-parameter               : type_modifier_list initializer                                { $$ = $2; }
-                        | type_modifier_list                                            { $$ = NULL; }
+parameter               : type_modifier_list initializer                                    { $$ = $2; }
+                        | type_modifier_list                                                { $$ = NULL; }
                         ;
 
     /* EXPRESSIONS */
