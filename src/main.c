@@ -1,11 +1,15 @@
 #include <stdio.h>
 
+#include "quadruples.c"
+
 extern int yyparse();
 extern FILE *yyin;
 extern void scope_down();
 extern void scope_up();
+extern void create_program();
 
 struct SymbolTable *current_scope = NULL;
+struct AST_Node *program = NULL;
 
 int main(int argc, char **argv)
 {
@@ -21,6 +25,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    create_program();
+
     scope_down();
 
     yyparse();
@@ -28,6 +34,8 @@ int main(int argc, char **argv)
     scope_up();
 
     fclose(yyin);
+
+    quadruples("output.asm");
 
     printf_s("\nParsing complete.\n");
 
