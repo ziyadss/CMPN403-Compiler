@@ -1,3 +1,5 @@
+#pragma once
+
 #define ST_ARRAY_SIZE 1
 
 #include <assert.h>
@@ -68,7 +70,7 @@ struct SymbolTable *create_table()
     assert(table != NULL);
 
     table->parent = NULL;
-    for (int i = 0; i < ST_ARRAY_SIZE; i++)
+    for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
         table->buckets[i] = NULL;
 
     return table;
@@ -76,7 +78,7 @@ struct SymbolTable *create_table()
 
 void destroy_table(struct SymbolTable *table)
 {
-    for (int i = 0; i < ST_ARRAY_SIZE; i++)
+    for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
     {
         struct SymbolTableEntry *head = table->buckets[i];
         while (head != NULL)

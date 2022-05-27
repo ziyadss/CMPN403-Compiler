@@ -1,3 +1,5 @@
+#pragma once
+
 #include "symbol_table.c"
 
 enum SyntaxError
@@ -13,7 +15,7 @@ void print_table(unsigned int line)
     printf_s("\nAt line %d, current table: ", line);
     while (table != NULL)
     {
-        for (int i = 0; i < ST_ARRAY_SIZE; i++)
+        for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
         {
             struct SymbolTableEntry *head = table->buckets[i];
             while (head != NULL)
