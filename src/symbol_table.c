@@ -19,7 +19,7 @@
 
 enum TYPE
 {
-    INT
+    INT_TYPE
     /*...*/
 };
 
