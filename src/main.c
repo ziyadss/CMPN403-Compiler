@@ -2,6 +2,8 @@
 
 extern int yyparse();
 extern FILE *yyin;
+extern void scope_down();
+extern void scope_up();
 
 struct SymbolTable *current_scope = NULL;
 
@@ -19,11 +21,15 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    scope_down();
+
     yyparse();
+
+    scope_up();
 
     fclose(yyin);
 
-    printf_s("Parsing complete.\n");
+    printf_s("\nParsing complete.\n");
 
     return 0;
 }
