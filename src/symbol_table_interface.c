@@ -25,7 +25,7 @@ void print_table(unsigned int line)
         printf_s("\nParent: ");
         table = table->parent;
     }
-    printf_s("NULL\n\n");
+    printf_s("Global Scope\n\n");
 }
 
 enum SyntaxError insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func)
