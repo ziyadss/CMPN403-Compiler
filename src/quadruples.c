@@ -52,6 +52,36 @@ char *_block(struct AST_Node *block)
     return NULL;
 }
 
+void _parameters_pop(struct AST_Node *parameters)
+{
+    if (parameters == NULL)
+        return;
+
+    while (parameters->right != NULL)
+    {
+        assert(parameters->right->tag == NODE_TYPE_IDENTIFIER);
+        fprintf_s(output_file, "POP %s\n", parameters->right->identifier);
+        parameters = parameters->left;
+    }
+
+    assert(parameters->tag == NODE_TYPE_IDENTIFIER);
+    fprintf_s(output_file, "POP %s\n", parameters->identifier);
+}
+
+void _parameters_push(struct AST_Node *parameters)
+{
+    if (parameters == NULL)
+        return;
+
+    if (parameters->tag == NODE_TYPE_OPERATION)
+    {
+        _parameters_push(parameters->left);
+        _parameters_push(parameters->right);
+    }
+    else
+        fprintf_s(output_file, "PUSH %s\n", _node(parameters));
+}
+
 void _operation_dst(char *identifier, struct AST_Node *operation)
 {
     switch (operation->op)
@@ -61,8 +91,8 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
     case COMMA_OP:
         break;
     case CALL_OP:
+        _parameters_push(operation->right);
         fprintf_s(output_file, "CALL %s\n", operation->left->identifier);
-        // _parameters(operation->right); BLOCK?? PARA??
         fprintf_s(output_file, "MOV %s, retval\n", identifier);
         break;
     case ASSIGN_OP:
@@ -87,6 +117,7 @@ char *_operation(struct AST_Node *operation)
     case COMMA_OP:
         break;
     case CALL_OP:
+        _parameters_push(operation->right);
         fprintf_s(output_file, "CALL %s\n", operation->left->identifier);
         ret = "t";
         break;
@@ -122,10 +153,10 @@ void quadruples(char *filename)
             _operation(node);
             break;
         case NODE_TYPE_FUNC_DEF:
-            fprintf_s(output_file, "%s: \n", node->identifier);
-            // parameters? node->left
+            fprintf_s(output_file, "%s: \nPOP retadr\n", node->identifier);
+            _parameters_pop(node->left);
             _block(node->right);
-            fprintf_s(output_file, "RET\n");
+            fprintf_s(output_file, "PUSH retadr\nRET\n");
             break;
         default:
             fprintf_s(stderr, "Invalid top level statement: %d\n", node->tag);

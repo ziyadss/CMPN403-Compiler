@@ -133,6 +133,12 @@ void print_node(struct AST_Node *statement)
         }
         printf_s("\nBLOCK END");
         break;
+    case NODE_TYPE_FUNC_DEF:
+        printf_s("FUNCTION %s START\n", statement->identifier);
+        print_node(statement->left);
+        print_node(statement->right);
+        printf_s("\nFUNCTION %s END\n", statement->identifier);
+        break;
     default:
         fprintf_s(stderr, "Unknown node type: %d\n", statement->tag);
         break;
