@@ -101,6 +101,7 @@ _Bool changeListParams(char **arr, enum TYPE* types)
         if (!changeParameters(arr[i], types, 0, 0 ))
             return 0;
     }
+    arrfree(arr);
     return 1;
 }
 void scope_down()
