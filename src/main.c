@@ -10,6 +10,7 @@ extern void create_program();
 
 struct SymbolTable *current_scope = NULL;
 struct AST_Node *program = NULL;
+enum SemanticError semantic_error = NO_ERROR;
 
 int main(int argc, char **argv)
 {
@@ -36,9 +37,11 @@ int main(int argc, char **argv)
 
     fclose(yyin);
 
+    printf("\nParsing complete.\n");
+
     quadruples("output.asm");
 
-    printf("\nParsing complete.\n");
+    printf("\nCode generation complete.\n");
 
     return 0;
 }
