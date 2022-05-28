@@ -251,7 +251,7 @@ switch_case             : CASE ternary_expression COLON block_item_list
 
     /* Iteration statements are WHILEs and DO WHILES and FORs */
 iteration_statement     : WHILE LPAREN expression RPAREN statement                                  { $$ = while_node($3, $5); }
-                        | DO statement WHILE LPAREN expression RPAREN SEMICOLON                     { $$ = NULL; }
+                        | DO statement WHILE LPAREN expression RPAREN SEMICOLON                     { $$ = do_while_node($5, $2); }
                         | FOR LPAREN optional_expression SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement { $$ = NULL; }
                         | FOR LPAREN declaration SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement { $$ = NULL; }
                         ;

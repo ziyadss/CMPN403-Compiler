@@ -31,6 +31,7 @@ char *reverse_jump(char *jmp)
         return "JL";
 
     fprintf(stderr, "Unknown jump: %s\n", jmp);
+    return NULL;
 }
 
 void _parameters_pop(struct AST_Node *parameters)
@@ -294,6 +295,15 @@ void _while(struct AST_Node *statement)
     fprintf(output_file, "JMP L%d\n\nL%d:\n", lbl1, lbl2);
 }
 
+void _do_while(struct AST_Node *statement)
+{
+    int lbl = _label_count();
+    fprintf(output_file, "L%d:\n", lbl);
+    _node(statement->then_branch, 1, 0);
+    char *jmp = _condition(statement->condition);
+    fprintf(output_file, "%s L%d\n", reverse_jump(jmp), lbl);
+}
+
 char *_node(struct AST_Node *statement, _Bool left, _Bool ternary)
 {
     char *ret = NULL;
@@ -304,6 +314,9 @@ char *_node(struct AST_Node *statement, _Bool left, _Bool ternary)
         break;
     case NODE_TYPE_WHILE:
         _while(statement);
+        break;
+    case NODE_TYPE_DO_WHILE:
+        _do_while(statement);
         break;
     case NODE_TYPE_STATEMENTS:
         _block(statement);
