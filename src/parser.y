@@ -129,7 +129,7 @@ assign_expression       : IDENTIFIER assignment_op assign_expression    { $$ = o
                         ;
 
     /* An ternary expression is either a ternary expression or decays to a logical or expression. */
-ternary_expression      : or_expression QUESTION expression COLON ternary_expression    {printf_s("Unreachable\n");}
+ternary_expression      : or_expression QUESTION expression COLON ternary_expression    { printf_s("Unreachable\n"); }
                         | or_expression
                         ;
 
@@ -217,10 +217,10 @@ optional_expression     : expression
     /* STATEMENTS */
 
     /* A statement is one of a block, selection, iteration, jump, a semicolon optionally preceded by an expression, a try or a declaration followed by a semicolon. */
-statement               : { scope_down();} block_statement  { scope_up(); $$ = $2; }
-                        | selection_statement               {$$ = NULL;}
-                        | iteration_statement               {$$ = NULL;}
-                        | try_statement                     {$$ = NULL;}
+statement               : { scope_down(); } block_statement  { scope_up(); $$ = $2; }
+                        | selection_statement               { $$ = NULL; }
+                        | iteration_statement               { $$ = NULL; }
+                        | try_statement                     { $$ = NULL; }
                         | jump_statement
                         | optional_expression SEMICOLON
                         | declaration SEMICOLON
@@ -260,29 +260,29 @@ iteration_statement     : WHILE LPAREN expression RPAREN statement
                         ;
 
     /* Jump statements are ones which affect control flow. */
-jump_statement          : CONTINUE SEMICOLON                                {$$ = NULL;}
-                        | BREAK SEMICOLON                                   {$$ = NULL;}
-                        | RETURN optional_expression SEMICOLON              {$$ = operation_node(ASSIGN_OP, identifier_node("retval"), $2);}
-                        | THROW optional_expression SEMICOLON               {$$ = $2;}
+jump_statement          : CONTINUE SEMICOLON                                { $$ = NULL; }
+                        | BREAK SEMICOLON                                   { $$ = NULL; }
+                        | RETURN optional_expression SEMICOLON              { $$ = operation_node(ASSIGN_OP, identifier_node("retval"), $2); }
+                        | THROW optional_expression SEMICOLON               { $$ = $2; }
                         ;
 
     /* A try statement is a try block followed by one or more catch blocks, and an optional finally block. */
 
-try_start               : TRY { scope_down();} block_statement { scope_up(); }
+try_start               : TRY { scope_down(); } block_statement { scope_up(); }
                         ;
 
 try_statement           : try_start catch_block_list
-                        | try_start catch_block_list FINALLY { scope_down();} block_statement { scope_up(); }
+                        | try_start catch_block_list FINALLY { scope_down(); } block_statement { scope_up(); }
                         ;
 
     /* A catch block list is a sequence of CATCHes and statements, the last which can be a catch-all. */
-catch_block_list        : non_final_catch_block CATCH { scope_down();} block_statement { scope_up(); }
+catch_block_list        : non_final_catch_block CATCH { scope_down(); } block_statement { scope_up(); }
                         | non_final_catch_block
-                        | CATCH { scope_down();} block_statement { scope_up(); }
+                        | CATCH { scope_down(); } block_statement { scope_up(); }
                         ;
 
-non_final_catch_block   : non_final_catch_block CATCH LPAREN type_modifier_list IDENTIFIER RPAREN { scope_down();} block_statement { scope_up(); }
-                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN { scope_down();} block_statement { scope_up(); }
+non_final_catch_block   : non_final_catch_block CATCH LPAREN type_modifier_list IDENTIFIER RPAREN { scope_down(); } block_statement { scope_up(); }
+                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN { scope_down(); } block_statement { scope_up(); }
                         ;
 
     /* MISCELLANEOUS */
@@ -316,35 +316,35 @@ enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE
                         ;
 
     /* Unary operators. */
-unary_op                : INC                       {$$ = INC_OP;}
-                        | DEC                       {$$ = DEC_OP;}
-                        | ADD                       {$$ = ADD_OP;}
-                        | SUB                       {$$ = SUB_OP;}
-                        | NOT                       {$$ = NOT_OP;}
-                        | BIT_NOT                   {$$ = BIT_NOT_OP;}
+unary_op                : INC                       { $$ = INC_OP; }
+                        | DEC                       { $$ = DEC_OP; }
+                        | ADD                       { $$ = ADD_OP; }
+                        | SUB                       { $$ = SUB_OP; }
+                        | NOT                       { $$ = NOT_OP; }
+                        | BIT_NOT                   { $$ = BIT_NOT_OP; }
                         ;
 
     /* Assignment perators. */
-assignment_op           : ADD_ASSIGN                {$$ = ADD_ASSIGN_OP;}
-                        | AND_ASSIGN                {$$ = AND_ASSIGN_OP;}
-                        | ASSIGN                    {$$ = ASSIGN_OP;}
-                        | DIV_ASSIGN                {$$ = DIV_ASSIGN_OP;}
-                        | MOD_ASSIGN                {$$ = MOD_ASSIGN_OP;}
-                        | MUL_ASSIGN                {$$ = MUL_ASSIGN_OP;}
-                        | OR_ASSIGN                 {$$ = OR_ASSIGN_OP;}
-                        | SHL_ASSIGN                {$$ = SHL_ASSIGN_OP;}
-                        | SHR_ASSIGN                {$$ = SHR_ASSIGN_OP;}
-                        | SUB_ASSIGN                {$$ = SUB_ASSIGN_OP;}
-                        | XOR_ASSIGN                {$$ = XOR_ASSIGN_OP;}
+assignment_op           : ADD_ASSIGN                { $$ = ADD_ASSIGN_OP; }
+                        | AND_ASSIGN                { $$ = AND_ASSIGN_OP; }
+                        | ASSIGN                    { $$ = ASSIGN_OP; }
+                        | DIV_ASSIGN                { $$ = DIV_ASSIGN_OP; }
+                        | MOD_ASSIGN                { $$ = MOD_ASSIGN_OP; }
+                        | MUL_ASSIGN                { $$ = MUL_ASSIGN_OP; }
+                        | OR_ASSIGN                 { $$ = OR_ASSIGN_OP; }
+                        | SHL_ASSIGN                { $$ = SHL_ASSIGN_OP; }
+                        | SHR_ASSIGN                { $$ = SHR_ASSIGN_OP; }
+                        | SUB_ASSIGN                { $$ = SUB_ASSIGN_OP; }
+                        | XOR_ASSIGN                { $$ = XOR_ASSIGN_OP; }
                         ;
 
     /* Literals. */
-literal                 : FALSE                             {$$ = bool_node(0);}
-                        | TRUE                              {$$ = bool_node(1);}
-                        | INT_LITERAL                       {$$ = int_node($1);}
-                        | FLOAT_LITERAL                     {$$ = float_node($1);}
-                        | CHAR_LITERAL                      {$$ = char_node($1);}
-                        | STRING_LITERAL                    {$$ = string_node($1);}
+literal                 : FALSE                             { $$ = bool_node(0); }
+                        | TRUE                              { $$ = bool_node(1); }
+                        | INT_LITERAL                       { $$ = int_node($1); }
+                        | FLOAT_LITERAL                     { $$ = float_node($1); }
+                        | CHAR_LITERAL                      { $$ = char_node($1); }
+                        | STRING_LITERAL                    { $$ = string_node($1); }
                         ;
 
 %%

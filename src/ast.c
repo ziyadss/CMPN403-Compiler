@@ -53,7 +53,7 @@ enum NODE_TYPE
     NODE_TYPE_FLOAT,
     NODE_TYPE_CHAR,
     NODE_TYPE_STRING,
-    NODE_TYPE_BOOL,
+    NODE_TYPE_BOOL
 };
 
 struct AST_Node
@@ -170,6 +170,16 @@ struct AST_Node *function_node(char *identifier, struct AST_Node *parameters, st
     return node;
 }
 
+struct AST_Node *call_node(struct AST_Node *identifier, struct AST_Node *arguments)
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_OPERATION;
+    node->op = CALL_OP;
+    node->left = identifier;
+    node->right = arguments;
+    return node;
+}
+
 struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statement)
 {
     assert(block->tag == NODE_TYPE_STATEMENTS);
@@ -182,16 +192,6 @@ struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statemen
 
     block->statements[block->statements_count++] = statement;
     return block;
-}
-
-struct AST_Node *call_node(struct AST_Node *identifier, struct AST_Node *arguments)
-{
-    struct AST_Node *node = create_node();
-    node->tag = NODE_TYPE_OPERATION;
-    node->op = CALL_OP;
-    node->left = identifier;
-    node->right = arguments;
-    return node;
 }
 
 extern struct AST_Node *program;
