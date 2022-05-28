@@ -45,6 +45,7 @@ enum OPERATION
 
 enum NODE_TYPE
 {
+    NODE_TYPE_IF,
     NODE_TYPE_FUNC_DEF,
     NODE_TYPE_STATEMENTS,
     NODE_TYPE_OPERATION,
@@ -60,6 +61,13 @@ struct AST_Node
 {
     union
     {
+        struct
+        {
+            struct AST_Node *condition;
+            struct AST_Node *then_branch;
+            struct AST_Node *else_branch;
+        };
+
         struct
         {
             unsigned int statements_count, statements_capacity;
@@ -177,6 +185,16 @@ struct AST_Node *call_node(struct AST_Node *identifier, struct AST_Node *argumen
     node->op = CALL_OP;
     node->left = identifier;
     node->right = arguments;
+    return node;
+}
+
+struct AST_Node *if_node(struct AST_Node *condition, struct AST_Node *then_branch, struct AST_Node *else_branch)
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_IF;
+    node->condition = condition;
+    node->then_branch = then_branch;
+    node->else_branch = else_branch;
     return node;
 }
 

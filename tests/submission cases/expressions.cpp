@@ -24,8 +24,10 @@ CMP b, 0
 JE L1
 MOV c, 1
 JMP L2
+
 L1:
 MOV c, 0
+
 L2:
 PUSH retadr
 RET

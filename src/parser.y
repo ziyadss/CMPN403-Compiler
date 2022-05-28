@@ -55,8 +55,7 @@
 
 %type <nodePointer>parameter parameter_list
 %type <stringValue>function_declaration parameterized_identifier
-%type <nodePointer>jump_statement
-// selection_statement iteration_statement jump_statement try_statement
+%type <nodePointer>jump_statement selection_statement
 
 %%
 
@@ -218,10 +217,10 @@ optional_expression     : expression
 
     /* A statement is one of a block, selection, iteration, jump, a semicolon optionally preceded by an expression, a try or a declaration followed by a semicolon. */
 statement               : { scope_down(); } block_statement  { scope_up(); $$ = $2; }
-                        | selection_statement               { $$ = NULL; }
+                        | selection_statement
                         | iteration_statement               { $$ = NULL; }
-                        | try_statement                     { $$ = NULL; }
                         | jump_statement
+                        | try_statement                     { $$ = NULL; }
                         | optional_expression SEMICOLON
                         | declaration SEMICOLON
                         ;
@@ -237,9 +236,9 @@ block_item_list         : block_item_list statement             { $$ = add_state
                         ;
 
     /* Selection statements are IFs and SWITCHes. */
-selection_statement     : IF LPAREN expression RPAREN statement %prec IF
-                        | IF LPAREN expression RPAREN statement ELSE statement
-                        | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE
+selection_statement     : IF LPAREN expression RPAREN statement %prec IF                    { $$ = if_node($3, $5, NULL); }
+                        | IF LPAREN expression RPAREN statement ELSE statement              { $$ = if_node($3, $5, $7); }
+                        | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE    { $$ = NULL; }
                         ;
 
     /* A switch case list is a sequence of switch cases. */
