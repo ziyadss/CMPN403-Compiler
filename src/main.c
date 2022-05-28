@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include "prints.h"
 
 extern int yyparse();
 extern FILE *yyin;
@@ -69,7 +70,7 @@ int main(int argc, char **argv)
 
         printf("\nCode generation complete.\n");
     }
-
+    print_table(yylineno);
     destroy_global_table();
     destroy_program();
 

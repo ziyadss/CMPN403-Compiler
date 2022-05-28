@@ -19,6 +19,8 @@
     struct AST_Node *nodePointer;
     struct SymbolTableEntry *entryPointer;
     int enumValue;
+    enum TYPE* enumPointer;
+    struct ReturnTuple *returnTuplePointer;
 }
 
     /* Keywords. */
@@ -48,12 +50,14 @@
 
 %type <enumValue>unary_op assignment_op type_modifier
 
-%type <nodePointer>initializer initializer_list function top_level_statement declaration
+%type <nodePointer>initializer function top_level_statement declaration
+%type <returnTuplePointer>initializer_list
 %type <nodePointer>block_statement block_item_list statement
 
 %type <nodePointer>parameter parameter_list
 %type <entryPointer>function_declaration parameterized_identifier
 %type <nodePointer>jump_statement selection_statement iteration_statement
+%type <enumPointer> type_modifier_list 
 
 %type <nodePointer>switch_case switch_case_list
 
@@ -71,26 +75,26 @@ top_level_statement     : declaration SEMICOLON
                         ;
 
     /* A declaration consists of a type, and optionally initializers. */
-declaration             : type_modifier_list initializer_list       { $$ = $2; }
+declaration             : type_modifier_list initializer_list       { $$ = $2->AST_component; changeListParams($2->char_array, $1); }
                         | type_modifier_list                        { $$ = NULL; }
                         ;
 
     /* Initializiers can be compounded using commas. */
-initializer_list        : initializer_list COMMA initializer        { $$ = operation_node(COMMA_OP, $1, $3); }
-                        | initializer
+initializer_list        : initializer_list COMMA initializer        { $$->AST_component = operation_node(COMMA_OP, $1->AST_component, $3); $$->char_array = insert_into_char_array($$->char_array, $3->identifier->name); }
+                        | initializer                               { $$->AST_component = $1; $$->char_array = generate_char_array(); $$->char_array = insert_into_char_array($$->char_array, $1->identifier->name); }
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0)), $3); }
-                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0)); }
+initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0, 0)), $3); }
+                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0, 0)); }
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
 
-parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { $$ = insert($2, 1, 1, 1); scope_down();  }
+parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { $$ = insert($2, 1, 1, 1, 0); scope_down();  }
                         ;
 
-function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = insert($2, 1, 1, 1); }
+function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = insert($2, 1, 1, 1, 0); }
                         ;
 
 function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); $$ = function_node($1, $2, $4); }
@@ -288,10 +292,10 @@ non_final_catch_block   : non_final_catch_block CATCH LPAREN type_modifier_list 
     /* MISCELLANEOUS */
 
     /* A sequence of type modifiers. Need semantic checks.*/
-type_modifier_list      : type_modifier_list type_modifier
-                        | type_modifier_list CONST
-                        | type_modifier
-                        | CONST
+type_modifier_list      : type_modifier_list type_modifier { $$ = insert_into_array($$, $2); }
+                        | type_modifier_list CONST { $$ = NULL; }
+                        | type_modifier         { $$ = generate_array(); insert_into_array($$, $1); }
+                        | CONST                 {$$ = NULL; }
                         ;
 
     /* A type modifier is a data type. */

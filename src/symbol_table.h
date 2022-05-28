@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 
 #define ST_ARRAY_SIZE 1
@@ -27,10 +28,11 @@ enum TYPE
 struct SymbolTableEntry
 {
     char *name;
-    enum TYPE *TYPES;
+    enum TYPE *types;
     _Bool is_init;
     _Bool is_used;
     _Bool is_func;
+    _Bool is_func_parameter;
     _Bool is_const;
 
     struct SymbolTableEntry *next;
@@ -53,9 +55,19 @@ enum SEMANTIC_ERROR
     IS_A_FUNCTION
 };
 
-struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func);
+struct SymbolTableEntry *insert(char *, _Bool , _Bool , _Bool , _Bool );
 void scope_down();
 void scope_up();
-struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init);
+struct SymbolTableEntry *lookup(char *, _Bool , _Bool );
+
+_Bool changeParameters(char *, enum TYPE*, _Bool, _Bool );
+_Bool changeListParams(char **, enum TYPE*);
+
+enum TYPE* generate_array();
+enum TYPE* insert_into_array(enum TYPE*, enum TYPE );
+
+char **generate_char_array();
+char **insert_into_char_array(char **, char*);
+
 
 #endif // SYMBOL_TABLE_H

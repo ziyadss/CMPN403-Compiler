@@ -54,7 +54,7 @@ struct SymbolTable *create_table()
     return table;
 }
 
-struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func)
+struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func, _Bool is_func_parameter)
 {
     unsigned int bucket = hash(identifier);
     struct SymbolTableEntry *head = current_scope->buckets[bucket];
@@ -70,11 +70,12 @@ struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init,
 
     entry->name = identifier;
     entry->next = head;
-    entry->TYPES = NULL;
+    entry->types = NULL;
     entry->is_init = is_init;
     entry->is_used = 0;
     entry->is_func = is_func;
     entry->is_const = is_const;
+    entry->is_func_parameter = is_func_parameter;
 
     current_scope->buckets[bucket] = entry;
 
@@ -82,11 +83,26 @@ struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init,
     return entry;
 }
 
-void insertParam(struct SymbolTableEntry *entry, enum TYPE type)
+_Bool changeParameters(char *identifier, enum TYPE* types, _Bool func, _Bool init)
 {
-    arrput(entry->TYPES, type);
+    struct SymbolTableEntry *entry = lookup(identifier, func, init);
+
+    if (entry == NULL)
+        return 0;
+
+    entry->types = types;
+    return 1;
 }
 
+_Bool changeListParams(char **arr, enum TYPE* types)
+{
+    for (ptrdiff_t i = 0; i < arrlen(arr); ++i) 
+    {
+        if (!changeParameters(arr[i], types, 0, 0 ))
+            return 0;
+    }
+    return 1;
+}
 void scope_down()
 {
     struct SymbolTable *new_scope = create_table();
@@ -141,6 +157,51 @@ char *get_error_message()
     }
 }
 
+enum TYPE* generate_array() 
+{
+    enum TYPE* arr = NULL;    
+    return arr;
+}
+//mesh ha generate signleton 
+
+enum TYPE* insert_into_array(enum TYPE *arr, enum TYPE type)
+{
+    arrput(arr, type);
+    return arr;
+}
+
+void delete_array(enum TYPE **arr)
+{
+    if (arr == NULL)
+        return;
+
+    arrfree(*arr);
+    arr = NULL;
+}
+
+//todo template later
+char **generate_char_array()
+{
+    char** arr = NULL; 
+    return arr;
+}
+
+char **insert_into_char_array(char **arr, char* identifier)
+{
+    arrput(arr, identifier);
+    return arr;
+}
+
+void delete_char_array(char ***arr)
+{
+    if (arr == NULL)
+        return;
+
+    arrfree(*arr);
+    arr = NULL;
+}
+//nice
+
 void destroy_table(struct SymbolTable *table)
 {
     for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
@@ -149,6 +210,7 @@ void destroy_table(struct SymbolTable *table)
         while (head != NULL)
         {
             struct SymbolTableEntry *next = head->next;
+            delete_array(&(head->types));
             free(head);
             head = next;
         }
@@ -156,6 +218,8 @@ void destroy_table(struct SymbolTable *table)
 
     free(table);
 }
+
+
 
 void destroy_global_table()
 {

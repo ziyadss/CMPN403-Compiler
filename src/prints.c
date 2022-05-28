@@ -1,4 +1,7 @@
 #include "prints.h"
+#include "stb_ds.h"
+
+
 
 extern struct SymbolTable *current_scope;
 extern struct AST_Node *program;
@@ -180,7 +183,10 @@ void print_table(unsigned int line)
             struct SymbolTableEntry *head = table->buckets[i];
             while (head != NULL)
             {
-                printf("%s, ", head->name);
+                printf("%s", head->name);
+                for (ptrdiff_t i = 0; i < arrlen(head->types); ++i)
+                    printf("%d, ", head->types[i]);
+
                 head = head->next;
             }
         }
