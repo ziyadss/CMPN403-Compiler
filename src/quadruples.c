@@ -95,11 +95,93 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         fprintf(output_file, "CALL %s\n", operation->left->identifier);
         fprintf(output_file, "MOV %s, retval\n", identifier);
         break;
+    case ADD_ASSIGN_OP:
+        fprintf(output_file, "ADD %s, %s, %s\n", identifier, identifier, _node(operation->right));
+        break;
+    case AND_ASSIGN_OP:
+        break;
     case ASSIGN_OP:
         fprintf(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right));
         break;
+    case DIV_ASSIGN_OP:
+        fprintf(output_file, "DIV %s, %s, %s\n", identifier, identifier, _node(operation->right));
+        break;
+    case MOD_ASSIGN_OP:
+        fprintf(output_file, "MOD %s, %s, %s\n", identifier, identifier, _node(operation->right));
+        break;
+    case MUL_ASSIGN_OP:
+        fprintf(output_file, "MUL %s, %s, %s\n", identifier, identifier, _node(operation->right));
+        break;
+    case OR_ASSIGN_OP:
+        break;
+    case SHL_ASSIGN_OP:
+        fprintf(output_file, "SHL %s, %s, %s\n", identifier, identifier, _node(operation->right));
+        break;
+    case SHR_ASSIGN_OP:
+        fprintf(output_file, "SHR %s, %s, %s\n", identifier, identifier, _node(operation->right));
+        break;
+    case SUB_ASSIGN_OP:
+        fprintf(output_file, "SUB %s, %s, %s\n", identifier, identifier, _node(operation->right));
+        break;
+    case XOR_ASSIGN_OP:
+        fprintf(output_file, "XOR %s, %s, %s\n", identifier, identifier, _node(operation->right));
+        break;
     case ADD_OP:
         fprintf(output_file, "ADD %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    case AND_OP:
+        break;
+    case BIT_AND_OP:
+        fprintf(output_file, "AND %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    case BIT_NOT_OP:
+        fprintf(output_file, "XOR %s, %s, -1\n", identifier, _node(operation->left));
+        break;
+    case BIT_OR_OP:
+        fprintf(output_file, "OR %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    case DEC_OP:
+        fprintf(output_file, "DEC %s\n", identifier);
+        break;
+    case DIV_OP:
+        fprintf(output_file, "DIV %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    case EQ_OP:
+        break;
+    case GE_OP:
+        break;
+    case GT_OP:
+        break;
+    case INC_OP:
+        fprintf(output_file, "INC %s\n", identifier);
+        break;
+    case LE_OP:
+        break;
+    case LT_OP:
+        break;
+    case MOD_OP:
+        fprintf(output_file, "MOD %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    case MUL_OP:
+        fprintf(output_file, "MUL %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    case NE_OP:
+        break;
+    case NOT_OP:
+        break;
+    case OR_OP:
+        break;
+    case SHL_OP:
+        fprintf(output_file, "SHL %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    case SHR_OP:
+        fprintf(output_file, "SHR %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    case SUB_OP:
+        fprintf(output_file, "SUB %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        break;
+    case XOR_OP:
+        fprintf(output_file, "XOR %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
         break;
     default:
         fprintf(output_file, "UNDEF_OP %s, %s\n", "target", "val");
@@ -121,6 +203,10 @@ char *_operation(struct AST_Node *operation)
         fprintf(output_file, "CALL %s\n", operation->left->identifier);
         ret = "t";
         break;
+    case ADD_ASSIGN_OP:
+        break;
+    case AND_ASSIGN_OP:
+        break;
     case ASSIGN_OP:
         if (operation->right->tag == NODE_TYPE_OPERATION)
             _operation_dst(operation->left->identifier, operation->right);
@@ -128,9 +214,91 @@ char *_operation(struct AST_Node *operation)
             fprintf(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right));
         ret = operation->left->identifier;
         break;
+    case DIV_ASSIGN_OP:
+        break;
+    case MOD_ASSIGN_OP:
+        break;
+    case MUL_ASSIGN_OP:
+        break;
+    case OR_ASSIGN_OP:
+        break;
+    case SHL_ASSIGN_OP:
+        break;
+    case SHR_ASSIGN_OP:
+        break;
+    case SUB_ASSIGN_OP:
+        break;
+    case XOR_ASSIGN_OP:
+        break;
     case ADD_OP:
         ret = "temp";
         fprintf(output_file, "ADD %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
+    case AND_OP:
+        break;
+    case BIT_AND_OP:
+        ret = "temp";
+        fprintf(output_file, "AND %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
+    case BIT_NOT_OP:
+        ret = "temp";
+        fprintf(output_file, "XOR %s, %s, -1\n", ret, _node(operation->left));
+        break;
+    case BIT_OR_OP:
+        ret = "temp";
+        fprintf(output_file, "OR %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
+    case DEC_OP:
+        ret = "temp";
+        fprintf(output_file, "SUB %s, %s, 1\n", ret, _node(operation->left));
+        break;
+    case DIV_OP:
+        ret = "temp";
+        fprintf(output_file, "DIV %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
+    case EQ_OP:
+        break;
+    case GE_OP:
+        break;
+    case GT_OP:
+        break;
+    case INC_OP:
+        ret = "temp";
+        fprintf(output_file, "ADD %s, %s, 1\n", ret, _node(operation->left));
+        break;
+    case LE_OP:
+        break;
+    case LT_OP:
+        break;
+    case MOD_OP:
+        ret = "temp";
+        fprintf(output_file, "MOD %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
+    case MUL_OP:
+        ret = "temp";
+        fprintf(output_file, "MUL %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
+    case NE_OP:
+        break;
+    case NOT_OP:
+        break;
+    case OR_OP:
+        break;
+    case SHL_OP:
+        ret = "temp";
+        fprintf(output_file, "SHL %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
+    case SHR_OP:
+        ret = "temp";
+        fprintf(output_file, "SHR %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
+    case SUB_OP:
+        ret = "temp";
+        fprintf(output_file, "SUB %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        break;
+    case XOR_OP:
+        ret = "temp";
+        fprintf(output_file, "XOR %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
         break;
     default:
         fprintf(output_file, "UNDEF_OP %s, %s\n", "target", "val");

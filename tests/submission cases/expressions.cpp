@@ -11,7 +11,7 @@ void main()
 
 /*
 
-MOV a, 0
+MOV x, 0
 MOV y, 10
 DIV TMP, x, y
 SUB z, TMP, x
