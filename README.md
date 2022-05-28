@@ -13,7 +13,7 @@ Major differences include:
 
 ## Notes about generated quadruples
 
-- Assumes the presence of four registers - retval, retadr, temp1, temp2.
+- Assumes the presence of five registers - retval, retadr, temp1, temp2, and temp3.
 
 ## Building and Running
 
