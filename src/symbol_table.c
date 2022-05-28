@@ -101,14 +101,14 @@ void scope_up()
     // destroy_table(old_scope);
 }
 
-struct SymbolTableEntry *lookup(char *identifier, _Bool func)
+struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init)
 {
     struct SymbolTableEntry *found = search_tables(current_scope, identifier);
     // run checks, as parameters to lookup (const, init, func)
     // if found == NULL OR checks fail, return NULL;
     if (found == NULL)
         semantic_error = UNDECLARED_IDENTIFIER;
-    else if (found->is_init == 0)
+    else if (found->is_init == 0 && init == 0)
         semantic_error = UNINITIALIZED_IDENTIFIER;
     else if (found->is_func == 0 && func == 1)
         semantic_error = NOT_A_FUNCTION;

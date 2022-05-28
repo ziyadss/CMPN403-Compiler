@@ -56,6 +56,6 @@ enum SEMANTIC_ERROR
 struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func);
 void scope_down();
 void scope_up();
-struct SymbolTableEntry *lookup(char *identifier);
+struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init);
 
 #endif // SYMBOL_TABLE_H
