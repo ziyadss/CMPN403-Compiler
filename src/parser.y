@@ -6,7 +6,7 @@
     #include "../src/main.c"
 
     int yylex();
-    int yyerror(const char *s) { fprintf_s(stderr, "Error: %s\n", s); return 1; }
+    int yyerror(const char *s) { fprintf(stderr, "Error: %s\n", s); return 1; }
     int yywrap() { return 1; }
     extern int yylineno;
 %}
@@ -129,7 +129,7 @@ assign_expression       : IDENTIFIER assignment_op assign_expression    { $$ = o
                         ;
 
     /* An ternary expression is either a ternary expression or decays to a logical or expression. */
-ternary_expression      : or_expression QUESTION expression COLON ternary_expression    { printf_s("Unreachable\n"); }
+ternary_expression      : or_expression QUESTION expression COLON ternary_expression    { printf("Unreachable\n"); }
                         | or_expression
                         ;
 

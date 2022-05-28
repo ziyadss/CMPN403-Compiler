@@ -38,7 +38,7 @@ char *_node(struct AST_Node *statement)
         ret = statement->boolValue ? "1" : "0";
         break;
     default:
-        fprintf_s(stderr, "Invalid statement: %d\n", statement->tag);
+        fprintf(stderr, "Invalid statement: %d\n", statement->tag);
         break;
     }
     return ret;
@@ -60,12 +60,12 @@ void _parameters_pop(struct AST_Node *parameters)
     while (parameters->right != NULL)
     {
         assert(parameters->right->tag == NODE_TYPE_IDENTIFIER);
-        fprintf_s(output_file, "POP %s\n", parameters->right->identifier);
+        fprintf(output_file, "POP %s\n", parameters->right->identifier);
         parameters = parameters->left;
     }
 
     assert(parameters->tag == NODE_TYPE_IDENTIFIER);
-    fprintf_s(output_file, "POP %s\n", parameters->identifier);
+    fprintf(output_file, "POP %s\n", parameters->identifier);
 }
 
 void _parameters_push(struct AST_Node *parameters)
@@ -79,7 +79,7 @@ void _parameters_push(struct AST_Node *parameters)
         _parameters_push(parameters->right);
     }
     else
-        fprintf_s(output_file, "PUSH %s\n", _node(parameters));
+        fprintf(output_file, "PUSH %s\n", _node(parameters));
 }
 
 void _operation_dst(char *identifier, struct AST_Node *operation)
@@ -92,17 +92,17 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         break;
     case CALL_OP:
         _parameters_push(operation->right);
-        fprintf_s(output_file, "CALL %s\n", operation->left->identifier);
-        fprintf_s(output_file, "MOV %s, retval\n", identifier);
+        fprintf(output_file, "CALL %s\n", operation->left->identifier);
+        fprintf(output_file, "MOV %s, retval\n", identifier);
         break;
     case ASSIGN_OP:
-        fprintf_s(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right));
+        fprintf(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right));
         break;
     case ADD_OP:
-        fprintf_s(output_file, "ADD %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
+        fprintf(output_file, "ADD %s, %s, %s\n", identifier, _node(operation->left), _node(operation->right));
         break;
     default:
-        fprintf_s(output_file, "UNDEF_OP %s, %s\n", "target", "val");
+        fprintf(output_file, "UNDEF_OP %s, %s\n", "target", "val");
         break;
     }
 }
@@ -118,22 +118,22 @@ char *_operation(struct AST_Node *operation)
         break;
     case CALL_OP:
         _parameters_push(operation->right);
-        fprintf_s(output_file, "CALL %s\n", operation->left->identifier);
+        fprintf(output_file, "CALL %s\n", operation->left->identifier);
         ret = "t";
         break;
     case ASSIGN_OP:
         if (operation->right->tag == NODE_TYPE_OPERATION)
             _operation_dst(operation->left->identifier, operation->right);
         else
-            fprintf_s(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right));
+            fprintf(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right));
         ret = operation->left->identifier;
         break;
     case ADD_OP:
         ret = "temp";
-        fprintf_s(output_file, "ADD %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
+        fprintf(output_file, "ADD %s, %s, %s\n", ret, _node(operation->left), _node(operation->right));
         break;
     default:
-        fprintf_s(output_file, "UNDEF_OP %s, %s\n", "target", "val");
+        fprintf(output_file, "UNDEF_OP %s, %s\n", "target", "val");
         break;
     }
     return ret;
@@ -153,16 +153,16 @@ void quadruples(char *filename)
             _operation(node);
             break;
         case NODE_TYPE_FUNC_DEF:
-            fprintf_s(output_file, "%s: \nPOP retadr\n", node->identifier);
+            fprintf(output_file, "%s: \nPOP retadr\n", node->identifier);
             _parameters_pop(node->left);
             _block(node->right);
-            fprintf_s(output_file, "PUSH retadr\nRET\n");
+            fprintf(output_file, "PUSH retadr\nRET\n");
             break;
         default:
-            fprintf_s(stderr, "Invalid top level statement: %d\n", node->tag);
+            fprintf(stderr, "Invalid top level statement: %d\n", node->tag);
             break;
         }
-        fprintf_s(output_file, "\n");
+        fprintf(output_file, "\n");
     }
 
     fclose(output_file);
