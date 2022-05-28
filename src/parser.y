@@ -17,6 +17,7 @@
     char *stringValue;
     _Bool boolValue;
     struct AST_Node *nodePointer;
+    struct SymbolTableEntry *entryPointer;
     int enumValue;
 }
 
@@ -51,7 +52,7 @@
 %type <nodePointer>block_statement block_item_list statement
 
 %type <nodePointer>parameter parameter_list
-%type <stringValue>function_declaration parameterized_identifier
+%type <entryPointer>function_declaration parameterized_identifier
 %type <nodePointer>jump_statement selection_statement iteration_statement
 
 %type <nodePointer>switch_case switch_case_list
@@ -86,16 +87,16 @@ initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = opera
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
 
-parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { scope_down(); $$ = $2; }
+parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { $$ = insert($2, 1, 1, 1); scope_down();  }
                         ;
 
-function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = $2; }
+function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = insert($2, 1, 1, 1); }
                         ;
 
-function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); $$ = function_node(insert($1, 1, 1, 1), $2, $4); }
-                        | function_declaration { scope_down(); } block_statement            { scope_up(); $$ = function_node(insert($1, 1, 1, 1), NULL, $3); }
-                        | parameterized_identifier parameter_list RPAREN RPAREN SEMICOLON   { scope_up(); $$ = function_node(insert($1, 1, 0, 1), $2, NULL); }
-                        | function_declaration SEMICOLON                                    {             $$ = function_node(insert($1, 1, 0, 1), NULL, NULL); }
+function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); $$ = function_node($1, $2, $4); }
+                        | function_declaration { scope_down(); } block_statement            { scope_up(); $$ = function_node($1, NULL, $3); }
+                        | parameterized_identifier parameter_list RPAREN RPAREN SEMICOLON   { scope_up(); $$ = function_node($1, $2, NULL); }
+                        | function_declaration SEMICOLON                                    {             $$ = function_node($1, NULL, NULL); }
                         ;
 
     /* A parameter list is a comma-separated list of parameters. */

@@ -55,7 +55,7 @@ void _parameters_push(struct AST_Node *parameters)
     if (parameters == NULL)
         return;
 
-    if (parameters->tag == NODE_TYPE_OPERATION)
+    if (parameters->tag == NODE_TYPE_OPERATION && parameters->op == COMMA_OP)
     {
         _parameters_push(parameters->left);
         _parameters_push(parameters->right);
@@ -328,7 +328,7 @@ void _do_while(struct AST_Node *statement)
     _node(statement->then_branch, 1, 0, lbl2);
     int lbl3 = _label_count(); // continue label
     char *jmp = _condition(statement->condition);
-    fprintf(output_file, "%s L%d\n\nL%d\n", reverse_jump(jmp), lbl1, lbl2);
+    fprintf(output_file, "%s L%d\n\nL%d:\n", reverse_jump(jmp), lbl1, lbl2);
 }
 
 char *_node(struct AST_Node *statement, _Bool left, _Bool ternary, int label)
@@ -566,7 +566,7 @@ char *_operation(struct AST_Node *operation, _Bool left)
         break;
     case CALL_OP:
         _parameters_push(operation->right);
-        fprintf(output_file, "CALL %s\n", operation->left->identifier->name);
+        fprintf(output_file, "CALL %s\nMOV %s, retval\n", operation->left->identifier->name, ret);
         break;
     case ADD_ASSIGN_OP:
         ret = operation->left->identifier->name;
