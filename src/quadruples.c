@@ -618,10 +618,13 @@ void quadruples()
             _operation(node, 1);
             break;
         case NODE_TYPE_FUNC_DEF:
-            fprintf(output_file, "%s: \nPOP retadr\n", node->identifier->name);
-            _parameters_pop(node->left);
-            if (strcmp(_block(node->right), "retval") != 0)
-                fprintf(output_file, "PUSH retadr\nRET\n");
+            if (node->right != NULL)
+            {
+                fprintf(output_file, "%s: \nPOP retadr\n", node->identifier->name);
+                _parameters_pop(node->left);
+                if (strcmp(_block(node->right), "retval") != 0)
+                    fprintf(output_file, "PUSH retadr\nRET\n");
+            }
             break;
         default:
             fprintf(stderr, "Invalid top level statement: %d\n", node->tag);
