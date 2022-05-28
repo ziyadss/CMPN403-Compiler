@@ -189,7 +189,7 @@ mul_expression          : mul_expression MUL prefix_expression          { $$ = o
                         ;
 
     /* A prefix expression is either a prefix expression or decays to a postfix expression. */
-prefix_expression       : unary_op prefix_expression                    { $$ = operation_node($1, $2, NULL); }
+prefix_expression       : unary_op prefix_expression                    { $$ = operation_node($1, NULL, $2); }
                         | postfix_expression
                         ;
 
