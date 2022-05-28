@@ -15,6 +15,24 @@ int _label_count()
     return label_count++;
 }
 
+char *reverse_jump(char *jmp)
+{
+    if (strcmp(jmp, "JE") == 0)
+        return "JNE";
+    else if (strcmp(jmp, "JNE") == 0)
+        return "JE";
+    else if (strcmp(jmp, "JLE") == 0)
+        return "JG";
+    else if (strcmp(jmp, "JG") == 0)
+        return "JLE";
+    else if (strcmp(jmp, "JL") == 0)
+        return "JGE";
+    else if (strcmp(jmp, "JGE") == 0)
+        return "JL";
+
+    fprintf(stderr, "Unknown jump: %s\n", jmp);
+}
+
 void _parameters_pop(struct AST_Node *parameters)
 {
     if (parameters == NULL)
