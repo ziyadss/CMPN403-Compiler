@@ -228,10 +228,10 @@ char *_condition(struct AST_Node *condition)
         fprintf(output_file, "CMP %f, 1\n", condition->floatValue);
         break;
     case NODE_TYPE_CHAR:
-        fprintf(output_file, "CMP %c, 1\n", condition->charValue);
+        fprintf(output_file, "CMP '%c', 1\n", condition->charValue);
         break;
     case NODE_TYPE_STRING:
-        fprintf(output_file, "CMP %s, 1\n", condition->stringValue);
+        fprintf(output_file, "CMP \"%s\", 1\n", condition->stringValue);
         break;
     case NODE_TYPE_BOOL:
         fprintf(output_file, "CMP %d, 1\n", condition->boolValue);
@@ -300,10 +300,10 @@ char *_node(struct AST_Node *statement, _Bool left, _Bool ternary)
         asprintf(&ret, "%f", statement->floatValue);
         break;
     case NODE_TYPE_CHAR:
-        asprintf(&ret, "%c", statement->charValue);
+        asprintf(&ret, "'%c'", statement->charValue);
         break;
     case NODE_TYPE_STRING:
-        ret = statement->stringValue;
+        asprintf(&ret, "\"%s\"", statement->stringValue);
         break;
     case NODE_TYPE_BOOL:
         ret = statement->boolValue ? "1" : "0";
