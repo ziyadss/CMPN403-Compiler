@@ -4,21 +4,19 @@ refactoring, low priority:
 
 
 
-
-
-requirements:
-generate ASM for
-comparison in non-cond expressions
-
+requirements, ordered by priority:
 AST and ASM for
 try-catch & stacktrace - current scope - lost in AST->ASM? found in refactored AST nodes?
+
+enums
 
 symbol table
 	check if var exists / right access
 	return errors decently
 	further semantic checks?
 
-enums
-
 type conversion quadruples
 	on generation, if valid cast exists output cast quadruple, else return semantic error of invalid operands
+
+ASM for
+comparison in non-cond expressions
