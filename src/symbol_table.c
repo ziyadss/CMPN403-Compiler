@@ -7,7 +7,7 @@
 extern int yyerror(const char *format, ...);
 
 struct SymbolTable *current_scope = NULL;
-enum SemanticError semantic_error = NO_ERROR;
+enum SEMANTIC_ERROR semantic_error = NO_ERROR;
 
 unsigned int hash(char *string)
 {

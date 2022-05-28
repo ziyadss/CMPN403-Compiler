@@ -43,7 +43,7 @@ struct SymbolTable
     struct SymbolTable *parent;
 };
 
-enum SemanticError
+enum SEMANTIC_ERROR
 {
     NO_ERROR,
     USED_IDENTIFIER,
