@@ -108,12 +108,12 @@ struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init)
     // if found == NULL OR checks fail, return NULL;
     if (found == NULL)
         semantic_error = UNDECLARED_IDENTIFIER;
-    else if (found->is_init == 0 && init == 0)
-        semantic_error = UNINITIALIZED_IDENTIFIER;
-    else if (found->is_func == 0 && func == 1)
-        semantic_error = NOT_A_FUNCTION;
-    else if (found->is_func == 1 && func == 0)
-        semantic_error = IS_A_FUNCTION;
+    // else if (found->is_init == 0 && init == 0)
+    //     semantic_error = UNINITIALIZED_IDENTIFIER;
+    // else if (found->is_func == 0 && func == 1)
+    //     semantic_error = NOT_A_FUNCTION;
+    // else if (found->is_func == 1 && func == 0)
+    //     semantic_error = IS_A_FUNCTION;
     else
         return found;
 

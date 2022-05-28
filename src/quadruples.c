@@ -311,10 +311,10 @@ void _switch(struct AST_Node *statement)
 
 void _while(struct AST_Node *statement)
 {
-    int lbl1 = _label_count();
+    int lbl1 = _label_count(); // continue label
     fprintf(output_file, "L%d:\n", lbl1);
     char *jmp = _condition(statement->condition);
-    int lbl2 = _label_count();
+    int lbl2 = _label_count(); // break label
     fprintf(output_file, "%s L%d\n", jmp, lbl2);
     _node(statement->then_branch, 1, 0, lbl2);
     fprintf(output_file, "JMP L%d\n\nL%d:\n", lbl1, lbl2);
@@ -323,9 +323,10 @@ void _while(struct AST_Node *statement)
 void _do_while(struct AST_Node *statement)
 {
     int lbl1 = _label_count();
-    int lbl2 = _label_count();
+    int lbl2 = _label_count(); // break label
     fprintf(output_file, "L%d:\n", lbl1);
     _node(statement->then_branch, 1, 0, lbl2);
+    int lbl3 = _label_count(); // continue label
     char *jmp = _condition(statement->condition);
     fprintf(output_file, "%s L%d\n\nL%d\n", reverse_jump(jmp), lbl1, lbl2);
 }
