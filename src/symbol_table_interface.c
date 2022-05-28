@@ -2,7 +2,7 @@
 
 #include "symbol_table.c"
 
-enum SyntaxError
+enum SemanticError
 {
     NO_ERROR, USED_IDENTIFIER
 };
@@ -30,7 +30,7 @@ void print_table(unsigned int line)
     printf_s("Global Scope\n\n");
 }
 
-enum SyntaxError insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func)
+enum SemanticError insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func)
 {
     unsigned int bucket = hash(identifier);
     struct SymbolTableEntry *head = current_scope->buckets[bucket];

@@ -6,24 +6,24 @@ struct SymbolTable *current_scope = NULL;
 
 int main()
 {
-    int result;
+    enum SemanticError result;
 
     scope_down();
 
-    result = insert("Variable1");
+    result = insert("Variable1", 0, 0, 0);
     assert(result == NO_ERROR);
 
     scope_down();
 
-    result = insert("Variable1");
+    result = insert("Variable1", 0, 0, 0);
     assert(result == NO_ERROR);
 
-    result = insert("Variable2");
+    result = insert("Variable2", 0, 0, 0);
     assert(result == NO_ERROR);
 
     scope_up();
 
-    result = insert("Variable1");
+    result = insert("Variable1", 0, 0, 0);
     assert(result == USED_IDENTIFIER);
 
     scope_up();
