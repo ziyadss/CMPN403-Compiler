@@ -15,13 +15,14 @@ int main(int argc, char **argv)
 {
     if (argc != 2)
     {
-        fprintf_s(stderr, "Usage: %s <filename>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
         return 1;
     }
 
-    if (fopen_s(&yyin, argv[1], "r") != 0)
+    yyin = fopen(argv[1], "r");
+    if (yyin == NULL)
     {
-        fprintf_s(stderr, "Error: Could not open file %s\n", argv[1]);
+        fprintf(stderr, "Error: Could not open file %s\n", argv[1]);
         return 1;
     }
 
@@ -37,7 +38,7 @@ int main(int argc, char **argv)
 
     quadruples("output.asm");
 
-    printf_s("\nParsing complete.\n");
+    printf("\nParsing complete.\n");
 
     return 0;
 }

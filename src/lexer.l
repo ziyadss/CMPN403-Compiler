@@ -112,7 +112,7 @@ H   [0-9a-fA-F]
 \'[^']\'                            { yylval.charValue = yytext[1];                     return CHAR_LITERAL; }
 \"[^"]*\"                           { 
                                         yylval.stringValue = malloc(yyleng);    // Freed after use in parser.
-                                        strncpy_s(yylval.stringValue, yyleng, yytext + 1, yyleng - 2);
+                                        strncpy(yylval.stringValue, yytext + 1, yyleng - 2);
                                         yylval.stringValue[yyleng - 2] = '\0';
                                                                                         return STRING_LITERAL;
                                         // Do we need to do this, or is yytext validity time sufficient?
@@ -125,11 +125,11 @@ H   [0-9a-fA-F]
     /* Identifier. */
 [a-zA-Z_][a-zA-Z0-9_]*              { 
                                         yylval.stringValue = malloc(yyleng + 1);    // Freed after use in parser.
-                                        strncpy_s(yylval.stringValue, yyleng + 1, yytext, yyleng);
+                                        strncpy(yylval.stringValue, yytext, yyleng);
                                         yylval.stringValue[yyleng] = '\0';
                                                                                         return IDENTIFIER;
                                     }
 
-.                                   printf_s("Unmatched: '%s'\n", yytext);
+.                                   printf("Unmatched: '%s'\n", yytext);
 
 %%
