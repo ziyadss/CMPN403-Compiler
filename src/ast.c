@@ -251,7 +251,6 @@ void destroy_ast(struct AST_Node *root)
     case NODE_TYPE_STATEMENTS:
         for (unsigned int i = 0; i < root->statements_count; i++)
             destroy_ast(root->statements[i]);
-
         free(root->statements);
         break;
     case NODE_TYPE_STRING:
