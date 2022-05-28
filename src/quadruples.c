@@ -1,5 +1,7 @@
 #include "quadruples.h"
 
+extern struct AST_Node *program;
+
 FILE *output_file = NULL;
 
 char *_operation(struct AST_Node *operation, _Bool left);
@@ -605,7 +607,6 @@ char *_operation(struct AST_Node *operation, _Bool left)
     return ret;
 }
 
-extern struct AST_Node* program;
 void quadruples()
 {
     for (unsigned int i = 0; i < program->statements_count; i++)

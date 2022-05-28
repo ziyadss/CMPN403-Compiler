@@ -39,11 +39,9 @@ enum SemanticError
     USED_IDENTIFIER
 };
 
-struct SymbolTable *create_table();
 struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func);
 void scope_down();
 void scope_up();
 struct SymbolTableEntry *lookup(char *identifier);
-void destroy_global_table();
 
 #endif // SYMBOL_TABLE_H

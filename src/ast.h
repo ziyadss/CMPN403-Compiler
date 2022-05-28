@@ -92,7 +92,6 @@ struct AST_Node
     enum NODE_TYPE tag;
 };
 
-struct AST_Node *create_node();
 struct AST_Node *identifier_node(struct SymbolTableEntry *identifier);
 struct AST_Node *int_node(int value);
 struct AST_Node *float_node(float value);
@@ -105,8 +104,6 @@ struct AST_Node *function_node(struct SymbolTableEntry *identifier, struct AST_N
 struct AST_Node *call_node(struct AST_Node *identifier, struct AST_Node *arguments);
 struct AST_Node *if_node(struct AST_Node *condition, struct AST_Node *then_branch, struct AST_Node *else_branch);
 struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statement);
-void create_program();
 void program_append(struct AST_Node *statement);
-void destroy_program();
 
 #endif // AST_H
