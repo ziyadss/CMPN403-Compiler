@@ -48,11 +48,13 @@
 %type <enumValue>unary_op assignment_op type_modifier
 
 %type <nodePointer>initializer initializer_list function top_level_statement declaration
-%type <nodePointer>block_statement block_item_list statement 
+%type <nodePointer>block_statement block_item_list statement
 
 %type <nodePointer>parameter parameter_list
 %type <stringValue>function_declaration parameterized_identifier
 %type <nodePointer>jump_statement selection_statement iteration_statement
+
+%type <nodePointer>switch_case switch_case_list
 
 %%
 
@@ -121,7 +123,7 @@ expression              : expression COMMA assign_expression            { $$ = o
                         ;
 
     /* An assignment expression is either an assignment expression or decays to a ternary expression. */
-assign_expression       : IDENTIFIER assignment_op assign_expression    { struct SymbolTableEntry* symbol = lookup($1); if (symbol == NULL) YYERROR; else $$ = operation_node($2, identifier_node(symbol), $3); }
+assign_expression       : IDENTIFIER assignment_op assign_expression    { struct SymbolTableEntry* symbol = lookup($1, 0, $2==ASSIGN_OP); if (symbol == NULL) YYERROR; else $$ = operation_node($2, identifier_node(symbol), $3); }
                         | ternary_expression
                         ;
 
@@ -196,12 +198,12 @@ prefix_expression       : unary_op prefix_expression                    { $$ = o
     /* A postfix expression is either a postfix expression (including a function call) or decays to a base expression. */
 postfix_expression      : postfix_expression INC                        { $$ = operation_node(INC_OP, $1, NULL); }
                         | postfix_expression DEC                        { $$ = operation_node(DEC_OP, $1, NULL); }
-                        | IDENTIFIER LPAREN optional_expression RPAREN  { struct SymbolTableEntry* symbol = lookup($1); if (symbol == NULL) YYERROR; else $$ = call_node(identifier_node(symbol), $3); }
+                        | IDENTIFIER LPAREN optional_expression RPAREN  { struct SymbolTableEntry* symbol = lookup($1, 1, 0); if (symbol == NULL) YYERROR; else $$ = call_node(identifier_node(symbol), $3); }
                         | base_expression
                         ;
 
     /* A base expression is either an identifier, a literal, or a parenthesized optional expression. */
-base_expression         : IDENTIFIER                                    { struct SymbolTableEntry* symbol = lookup($1); if (symbol == NULL) YYERROR; else $$ = identifier_node(symbol); }
+base_expression         : IDENTIFIER                                    { struct SymbolTableEntry* symbol = lookup($1, 0, 0); if (symbol == NULL) YYERROR; else $$ = identifier_node(symbol); }
                         | literal
                         | LPAREN optional_expression RPAREN             { $$ = $2; }
                         ;
@@ -236,17 +238,17 @@ block_item_list         : block_item_list statement             { $$ = add_state
     /* Selection statements are IFs and SWITCHes. */
 selection_statement     : IF LPAREN expression RPAREN statement %prec IF                    { $$ = if_node($3, $5, NULL); }
                         | IF LPAREN expression RPAREN statement ELSE statement              { $$ = if_node($3, $5, $7); }
-                        | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE    { $$ = NULL; }
+                        | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE    { $$ = switch_node($3, $6); }
                         ;
 
     /* A switch case list is a sequence of switch cases. */
-switch_case_list        : switch_case_list switch_case
-                        | switch_case
+switch_case_list        : switch_case_list switch_case                          { $$ = add_statement($1, $2); }
+                        | switch_case                                           { $$ = block_node($1); }
                         ;
 
     /* The two case types of a switch case. */
-switch_case             : CASE ternary_expression COLON block_item_list
-                        | DEFAULT COLON block_item_list
+switch_case             : CASE ternary_expression COLON block_item_list         { $$ = if_node(operation_node(EQ_OP, NULL, $2), $4, NULL); }
+                        | DEFAULT COLON block_item_list                         { $$ = $3; }
                         ;
 
     /* Iteration statements are WHILEs and DO WHILES and FORs */

@@ -148,8 +148,9 @@ char *_inv_cond_operation(struct AST_Node *operation, char **jmp)
     case DIV_OP:
         fprintf(output_file, "DIV %s, %s, %s\n", name, _node(operation->left, 1, 1), _node(operation->right, 0, 1));
         break;
-    case EQ_OP:
-        fprintf(output_file, "CMP %s, %s\n", _node(operation->left, 1, 1), _node(operation->right, 0, 1));
+    case EQ_OP:;
+        char *left_op = operation->left == NULL ? "temp3" : _node(operation->left, 1, 1);
+        fprintf(output_file, "CMP %s, %s\n", left_op, _node(operation->right, 0, 1));
         *jmp = "JNE";
         break;
     case GE_OP:
@@ -253,9 +254,9 @@ char *_condition(struct AST_Node *condition)
     return ret;
 }
 
-char *_if(struct AST_Node *statement, _Bool ternary)
+char *_if(struct AST_Node *statement, _Bool ternary, char *dest)
 {
-    char *dst = "temp1";
+    char *dst = dest == NULL ? "temp1" : dest;
     char *jmp = _condition(statement->condition);
     int lbl1 = _label_count();
     fprintf(output_file, "%s L%d\n", jmp, lbl1);
@@ -284,6 +285,28 @@ char *_if(struct AST_Node *statement, _Bool ternary)
     return dst;
 }
 
+void _switch(struct AST_Node *statement)
+{
+    if (statement->left->tag == NODE_TYPE_OPERATION)
+        _operation_dst("temp3", statement->left);
+    else if (statement->left->tag == NODE_TYPE_IF)
+        _if(statement->left, 1, "temp3");
+    else
+        fprintf(output_file, "MOV temp3, %s\n", _node(statement->left, 1, 1));
+
+    assert(statement->right->tag == NODE_TYPE_STATEMENTS);
+    for (unsigned int i = 0; i < statement->right->statements_count; i++)
+    {
+        struct AST_Node *case_statement = statement->right->statements[i];
+        _node(case_statement, 1, 0);
+        // int lbl1 = _label_count();
+        // fprintf(output_file, "CMP temp3, %s\n", _node(case_statement->left, 1, 0));
+        // fprintf(output_file, "JE L%d\n", lbl1);
+        // _node(case_statement->right, 1, 0);
+        // fprintf(output_file, "\nL%d:\n", lbl1);
+    }
+}
+
 void _while(struct AST_Node *statement)
 {
     int lbl1 = _label_count();
@@ -310,7 +333,10 @@ char *_node(struct AST_Node *statement, _Bool left, _Bool ternary)
     switch (statement->tag)
     {
     case NODE_TYPE_IF:
-        ret = _if(statement, ternary);
+        ret = _if(statement, ternary, NULL);
+        break;
+    case NODE_TYPE_SWITCH:
+        _switch(statement);
         break;
     case NODE_TYPE_WHILE:
         _while(statement);

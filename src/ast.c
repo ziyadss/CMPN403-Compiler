@@ -109,6 +109,15 @@ struct AST_Node *if_node(struct AST_Node *condition, struct AST_Node *then_branc
     return node;
 }
 
+struct AST_Node *switch_node(struct AST_Node *expression, struct AST_Node *cases)
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_SWITCH;
+    node->left = expression;
+    node->right = cases;
+    return node;
+}
+
 struct AST_Node *while_node(struct AST_Node *condition, struct AST_Node *body)
 {
     struct AST_Node *node = create_node();
@@ -190,6 +199,7 @@ void destroy_ast(struct AST_Node *root)
         break;
     case NODE_TYPE_FUNC_DEF:
     case NODE_TYPE_OPERATION:
+    case NODE_TYPE_SWITCH:
         destroy_ast(root->left);
         destroy_ast(root->right);
         break;
