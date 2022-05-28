@@ -12,7 +12,7 @@ extern struct SymbolTable *current_scope;
 void print_table(unsigned int line)
 {
     struct SymbolTable *table = current_scope;
-    printf_s("\nAt line %d, current table: ", line);
+    printf("\nAt line %d, current table: ", line);
     while (table != NULL)
     {
         for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
@@ -20,14 +20,14 @@ void print_table(unsigned int line)
             struct SymbolTableEntry *head = table->buckets[i];
             while (head != NULL)
             {
-                printf_s("%s, ", head->identifier);
+                printf("%s, ", head->identifier);
                 head = head->next;
             }
         }
-        printf_s("\nParent: ");
+        printf("\nParent: ");
         table = table->parent;
     }
-    printf_s("Global Scope\n\n");
+    printf("Global Scope\n\n");
 }
 
 enum SyntaxError insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func)
