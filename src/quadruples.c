@@ -26,12 +26,12 @@ void _parameters_pop(struct AST_Node *parameters)
     while (parameters->right != NULL)
     {
         assert(parameters->right->tag == NODE_TYPE_IDENTIFIER);
-        fprintf(output_file, "POP %s\n", parameters->right->identifier);
+        fprintf(output_file, "POP %s\n", parameters->right->identifier->name);
         parameters = parameters->left;
     }
 
     assert(parameters->tag == NODE_TYPE_IDENTIFIER);
-    fprintf(output_file, "POP %s\n", parameters->identifier);
+    fprintf(output_file, "POP %s\n", parameters->identifier->name);
 }
 
 void _parameters_push(struct AST_Node *parameters)
@@ -57,55 +57,55 @@ char *_inv_cond_operation(struct AST_Node *operation, char **jmp)
     {
     case CALL_OP:
         _parameters_push(operation->right);
-        fprintf(output_file, "CALL %s\n", operation->left->identifier);
+        fprintf(output_file, "CALL %s\n", operation->left->identifier->name);
         name = "retval";
         break;
     case ADD_ASSIGN_OP:
-        fprintf(output_file, "ADD %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "ADD %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case AND_ASSIGN_OP:
-        fprintf(output_file, "AND %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "AND %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case ASSIGN_OP:
         if (operation->right->tag == NODE_TYPE_OPERATION)
-            _operation_dst(operation->left->identifier, operation->right);
+            _operation_dst(operation->left->identifier->name, operation->right);
         else
-            fprintf(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+            fprintf(output_file, "MOV %s, %s\n", operation->left->identifier->name, _node(operation->right, 1, 1));
+        name = operation->left->identifier->name;
         break;
     case DIV_ASSIGN_OP:
-        fprintf(output_file, "DIV %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "DIV %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case MOD_ASSIGN_OP:
-        fprintf(output_file, "MOD %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "MOD %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case MUL_ASSIGN_OP:
-        fprintf(output_file, "MUL %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "MUL %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case OR_ASSIGN_OP:
-        fprintf(output_file, "OR %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "OR %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case SHL_ASSIGN_OP:
-        fprintf(output_file, "SHL %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "SHL %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case SHR_ASSIGN_OP:
-        fprintf(output_file, "SHR %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "SHR %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case SUB_ASSIGN_OP:
-        fprintf(output_file, "SUB %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "SUB %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case XOR_ASSIGN_OP:
-        fprintf(output_file, "XOR %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        name = operation->left->identifier;
+        name = operation->left->identifier->name;
+        fprintf(output_file, "XOR %s, %s, %s\n", name, name, _node(operation->right, 1, 1));
         break;
     case ADD_OP:
         fprintf(output_file, "ADD %s, %s, %s\n", name, _node(operation->left, 1, 1), _node(operation->right, 0, 1));
@@ -219,7 +219,7 @@ char *_condition(struct AST_Node *condition)
         }
         break;
     case NODE_TYPE_IDENTIFIER:
-        fprintf(output_file, "CMP %s, 1\n", condition->identifier);
+        fprintf(output_file, "CMP %s, 1\n", condition->identifier->name);
         break;
     case NODE_TYPE_INT:
         fprintf(output_file, "CMP %d, 1\n", condition->intValue);
@@ -291,7 +291,7 @@ char *_node(struct AST_Node *statement, _Bool left, _Bool ternary)
         ret = _operation(statement, left);
         break;
     case NODE_TYPE_IDENTIFIER:
-        ret = statement->identifier;
+        ret = statement->identifier->name;
         break;
     case NODE_TYPE_INT:
         asprintf(&ret, "%d", statement->intValue);
@@ -332,7 +332,7 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         break;
     case CALL_OP:
         _parameters_push(operation->right);
-        fprintf(output_file, "CALL %s\n", operation->left->identifier);
+        fprintf(output_file, "CALL %s\n", operation->left->identifier->name);
         fprintf(output_file, "MOV %s, retval\n", identifier);
         break;
     case ADD_ASSIGN_OP:
@@ -342,7 +342,7 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         fprintf(output_file, "AND %s, %s, %s\n", identifier, identifier, _node(operation->right, 1, 1));
         break;
     case ASSIGN_OP:
-        fprintf(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right, 1, 1));
+        fprintf(output_file, "MOV %s, %s\n", operation->left->identifier->name, _node(operation->right, 1, 1));
         break;
     case DIV_ASSIGN_OP:
         fprintf(output_file, "DIV %s, %s, %s\n", identifier, identifier, _node(operation->right, 1, 1));
@@ -473,54 +473,54 @@ char *_operation(struct AST_Node *operation, _Bool left)
         break;
     case CALL_OP:
         _parameters_push(operation->right);
-        fprintf(output_file, "CALL %s\n", operation->left->identifier);
+        fprintf(output_file, "CALL %s\n", operation->left->identifier->name);
         break;
     case ADD_ASSIGN_OP:
-        fprintf(output_file, "ADD %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "ADD %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case AND_ASSIGN_OP:
-        fprintf(output_file, "AND %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "AND %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case ASSIGN_OP:
         if (operation->right->tag == NODE_TYPE_OPERATION)
-            _operation_dst(operation->left->identifier, operation->right);
+            _operation_dst(operation->left->identifier->name, operation->right);
         else
-            fprintf(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+            fprintf(output_file, "MOV %s, %s\n", operation->left->identifier->name, _node(operation->right, 1, 1));
+        ret = operation->left->identifier->name;
         break;
     case DIV_ASSIGN_OP:
-        fprintf(output_file, "DIV %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "DIV %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case MOD_ASSIGN_OP:
-        fprintf(output_file, "MOD %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "MOD %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case MUL_ASSIGN_OP:
-        fprintf(output_file, "MUL %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "MUL %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case OR_ASSIGN_OP:
-        fprintf(output_file, "OR %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "OR %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case SHL_ASSIGN_OP:
-        fprintf(output_file, "SHL %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "SHL %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case SHR_ASSIGN_OP:
-        fprintf(output_file, "SHR %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "SHR %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case SUB_ASSIGN_OP:
-        fprintf(output_file, "SUB %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "SUB %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case XOR_ASSIGN_OP:
-        fprintf(output_file, "XOR %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1, 1));
-        ret = operation->left->identifier;
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "XOR %s, %s, %s\n", ret, ret, _node(operation->right, 1, 1));
         break;
     case ADD_OP:
         fprintf(output_file, "ADD %s, %s, %s\n", ret, _node(operation->left, 1, 1), _node(operation->right, 0, 1));
@@ -622,7 +622,7 @@ void quadruples(char *filename)
             _operation(node, 1);
             break;
         case NODE_TYPE_FUNC_DEF:
-            fprintf(output_file, "%s: \nPOP retadr\n", node->identifier);
+            fprintf(output_file, "%s: \nPOP retadr\n", node->identifier->name);
             _parameters_pop(node->left);
             if (strcmp(_block(node->right), "retval") != 0)
                 fprintf(output_file, "PUSH retadr\nRET\n");
