@@ -268,7 +268,7 @@ char *_if(struct AST_Node *statement, _Bool ternary)
 void _while(struct AST_Node *statement)
 {
     int lbl1 = _label_count();
-    fprintf(output_file, "L%d:\n", lbl1);   
+    fprintf(output_file, "L%d:\n", lbl1);
     char *jmp = _condition(statement->condition);
     int lbl2 = _label_count();
     fprintf(output_file, "%s L%d\n", jmp, lbl2);
@@ -614,7 +614,8 @@ void quadruples()
             {
                 fprintf(output_file, "%s: \nPOP retadr\n", node->identifier->name);
                 _parameters_pop(node->left);
-                if (strcmp(_block(node->right), "retval") != 0)
+                char *end = _block(node->right);
+                if (end == NULL || strcmp(end, "retval") != 0)
                     fprintf(output_file, "PUSH retadr\nRET\n");
             }
             break;
