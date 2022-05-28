@@ -172,7 +172,6 @@ void print_program()
     }
     printf("\nPROGRAM END\n");
 }
-<<<<<<< Updated upstream:src/prints.c
 
 void print_table(unsigned int line)
 {
@@ -194,5 +193,3 @@ void print_table(unsigned int line)
     }
     printf("Global Scope\n\n");
 }
-=======
->>>>>>> Stashed changes:src/ast_print.c

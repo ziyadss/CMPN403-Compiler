@@ -10,8 +10,18 @@
 
 enum TYPE
 {
-    INT_TYPE
-    /*...*/
+    BOOL_TYPE,
+    CHAR_TYPE,
+    DOUBLE_TYPE,
+    FLOAT_TYPE,
+    INT_TYPE,
+    LONG_TYPE,
+    SHORT_TYPE,
+    SIGNED_TYPE,
+    STRING_TYPE,
+    UNSIGNED_TYPE,
+    VOID_TYPE,
+    ENUM_TYPE
 };
 
 struct SymbolTableEntry
