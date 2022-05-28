@@ -1,6 +1,8 @@
 #include "symbol_table.h"
 #include "helpers.h"
 
+extern int yyerror(const char *format, ...);
+
 struct SymbolTable *current_scope = NULL;
 enum SemanticError semantic_error = NO_ERROR;
 
@@ -121,15 +123,26 @@ struct SymbolTableEntry *lookup(char *identifier)
     // if found == NULL OR checks fail, return NULL;
     if (found == NULL)
     {
-        semantic_error = USED_IDENTIFIER;
-// yyerror("Error: Identifier %s used on line %d, before declaration\n", yylineno, identifier);
-#ifdef YYERROR
-        YYERROR;
-        printf("Yes.\n");
-#endif
+        semantic_error = UNDECLARED_IDENTIFIER;
+        return NULL;
     }
 
     return found;
+}
+
+char *get_error_message()
+{
+    switch(semantic_error)
+    {
+        case NO_ERROR:
+            return NULL;
+        case USED_IDENTIFIER:
+            return "Identifier already used";
+        case UNDECLARED_IDENTIFIER:
+            return "Identifier not declared";
+        default:
+            return "Unknown error";
+    }
 }
 
 void destroy_table(struct SymbolTable *table)

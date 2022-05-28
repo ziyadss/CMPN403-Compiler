@@ -196,12 +196,12 @@ prefix_expression       : unary_op prefix_expression                    { $$ = o
     /* A postfix expression is either a postfix expression (including a function call) or decays to a base expression. */
 postfix_expression      : postfix_expression INC                        { $$ = operation_node(INC_OP, $1, NULL); }
                         | postfix_expression DEC                        { $$ = operation_node(DEC_OP, $1, NULL); }
-                        | IDENTIFIER LPAREN optional_expression RPAREN  { $$ = call_node(identifier_node(lookup($1)), $3); }
+                        | IDENTIFIER LPAREN optional_expression RPAREN  { struct SymbolTableEntry* symbol = lookup($1); if (symbol == NULL) YYERROR; else $$ = call_node(identifier_node(symbol), $3); }
                         | base_expression
                         ;
 
     /* A base expression is either an identifier, a literal, or a parenthesized optional expression. */
-base_expression         : IDENTIFIER                                    { $$ = identifier_node(lookup($1)); }
+base_expression         : IDENTIFIER                                    { struct SymbolTableEntry* symbol = lookup($1); if (symbol == NULL) YYERROR; else $$ = identifier_node(symbol); }
                         | literal
                         | LPAREN optional_expression RPAREN             { $$ = $2; }
                         ;
