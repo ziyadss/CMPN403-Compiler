@@ -6,7 +6,7 @@ extern int yyparse();
 extern FILE *yyin;
 extern void scope_down();
 extern void scope_up();
-extern void create_program();
+struct AST_Node *create_program();
 
 struct SymbolTable *current_scope = NULL;
 struct AST_Node *program = NULL;
@@ -27,21 +27,24 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    create_program();
+    program = create_program();
 
-    scope_down();
+    current_scope = create_table();
 
     yyparse();
 
-    scope_up();
-
     fclose(yyin);
 
-    printf("\nParsing complete.\n");
+    printf("Parsing complete.\n");
 
     quadruples("output.asm");
 
     printf("\nCode generation complete.\n");
+
+    destroy_table(current_scope);
+    destroy_ast(program);
+
+    printf("\nCleanup successful.\n");
 
     return 0;
 }

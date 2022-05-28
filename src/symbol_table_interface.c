@@ -76,7 +76,7 @@ void scope_up()
 {
     struct SymbolTable *old_scope = current_scope;
     current_scope = old_scope->parent;
-    destroy_table(old_scope);
+    // destroy_table(old_scope);
 }
 
 struct SymbolTableEntry *lookup(char *identifier)
