@@ -60,13 +60,13 @@ struct AST_Node
 {
     union
     {
-        struct statements
+        struct
         {
             unsigned int statements_count, statements_capacity;
             struct AST_Node **statements;
         };
 
-        struct operation
+        struct
         {
             enum OPERATION op;
             struct AST_Node *left;
