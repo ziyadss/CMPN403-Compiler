@@ -8,7 +8,7 @@ void print_node(struct AST_Node *statement)
     switch (statement->tag)
     {
     case NODE_TYPE_IDENTIFIER:
-        printf("%s", statement->identifier);
+        printf("%s", statement->identifier->name);
         break;
     case NODE_TYPE_INT:
         printf("%d", statement->intValue);
@@ -134,10 +134,10 @@ void print_node(struct AST_Node *statement)
         printf("\nBLOCK END");
         break;
     case NODE_TYPE_FUNC_DEF:
-        printf("FUNCTION %s START\n", statement->identifier);
+        printf("FUNCTION %s START\n", statement->identifier->name);
         print_node(statement->left);
         print_node(statement->right);
-        printf("\nFUNCTION %s END\n", statement->identifier);
+        printf("\nFUNCTION %s END\n", statement->identifier->name);
         break;
     default:
         fprintf(stderr, "Unknown node type: %d\n", statement->tag);
@@ -157,7 +157,7 @@ void print_program()
             printf("\n\nTop level statement %d, a declaration:\n", i);
             print_node(statement);
             break;
-        case NODE_TYPE_STATEMENTS:
+        case NODE_TYPE_FUNC_DEF:
             printf("\n\nTop level statement %d, a function: \n", i);
             print_node(statement);
             break;

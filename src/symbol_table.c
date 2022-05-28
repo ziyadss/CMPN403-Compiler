@@ -25,7 +25,7 @@ enum TYPE
 
 struct SymbolTableEntry
 {
-    char *identifier;
+    char *name;
     enum TYPE *TYPES;
     _Bool is_init;
     _Bool is_used;
@@ -52,7 +52,7 @@ struct SymbolTableEntry *search_bucket(struct SymbolTableEntry *node, char *iden
 {
     while (node != NULL)
     {
-        if (strcmp(node->identifier, identifier) == 0)
+        if (strcmp(node->name, identifier) == 0)
             return node;
         node = node->next;
     }

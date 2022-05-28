@@ -80,8 +80,8 @@ initializer_list        : initializer_list COMMA initializer        { $$ = opera
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { insert($1, 0, 1, 0); $$ = operation_node(ASSIGN_OP, identifier_node($1), $3); }
-                        | IDENTIFIER                                { insert($1, 0, 0, 0); $$ = identifier_node($1); }
+initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0)), $3); }
+                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0)); }
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
@@ -92,10 +92,10 @@ parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                  
 function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = $2; }
                         ;
 
-function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); identifier_node($1); insert($1, 1, 1, 1); $$ = function_node($1, $2, $4); }
-                        | function_declaration { scope_down(); } block_statement            { scope_up(); identifier_node($1); insert($1, 1, 1, 1); $$ = function_node($1, NULL, $3); }
-                        | parameterized_identifier parameter_list RPAREN RPAREN SEMICOLON   { scope_up(); identifier_node($1); insert($1, 1, 0, 1); $$ = function_node($1, $2, NULL); }
-                        | function_declaration SEMICOLON                                    {             identifier_node($1); insert($1, 1, 0, 1); $$ = function_node($1, NULL, NULL); }
+function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); $$ = function_node(insert($1, 1, 1, 1), $2, $4); }
+                        | function_declaration { scope_down(); } block_statement            { scope_up(); $$ = function_node(insert($1, 1, 1, 1), NULL, $3); }
+                        | parameterized_identifier parameter_list RPAREN RPAREN SEMICOLON   { scope_up(); $$ = function_node(insert($1, 1, 0, 1), $2, NULL); }
+                        | function_declaration SEMICOLON                                    {             $$ = function_node(insert($1, 1, 0, 1), NULL, NULL); }
                         ;
 
     /* A parameter list is a comma-separated list of parameters. */
@@ -123,7 +123,7 @@ expression              : expression COMMA assign_expression            { $$ = o
                         ;
 
     /* An assignment expression is either an assignment expression or decays to a ternary expression. */
-assign_expression       : IDENTIFIER assignment_op assign_expression    { $$ = operation_node($2, identifier_node($1), $3); }
+assign_expression       : IDENTIFIER assignment_op assign_expression    { $$ = operation_node($2, identifier_node(lookup($1)), $3); }
                         | ternary_expression
                         ;
 
@@ -198,12 +198,12 @@ prefix_expression       : unary_op prefix_expression                    { $$ = o
     /* A postfix expression is either a postfix expression (including a function call) or decays to a base expression. */
 postfix_expression      : postfix_expression INC                        { $$ = operation_node(INC_OP, $1, NULL); }
                         | postfix_expression DEC                        { $$ = operation_node(DEC_OP, $1, NULL); }
-                        | IDENTIFIER LPAREN optional_expression RPAREN  { $$ = call_node(identifier_node($1), $3); }
+                        | IDENTIFIER LPAREN optional_expression RPAREN  { $$ = call_node(identifier_node(lookup($1)), $3); }
                         | base_expression
                         ;
 
     /* A base expression is either an identifier, a literal, or a parenthesized optional expression. */
-base_expression         : IDENTIFIER                                    { $$ = identifier_node($1); }
+base_expression         : IDENTIFIER                                    { $$ = identifier_node(lookup($1)); }
                         | literal
                         | LPAREN optional_expression RPAREN             { $$ = $2; }
                         ;

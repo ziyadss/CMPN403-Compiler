@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include "symbol_table_interface.c"
 
 enum OPERATION
 {
@@ -87,7 +88,7 @@ struct AST_Node
         char *stringValue;
         _Bool boolValue;
     };
-    char *identifier;
+    struct SymbolTableEntry *identifier;
     enum NODE_TYPE tag;
 };
 
@@ -98,7 +99,7 @@ struct AST_Node *create_node()
     return node;
 }
 
-struct AST_Node *identifier_node(char *identifier)
+struct AST_Node *identifier_node(struct SymbolTableEntry *identifier)
 {
     struct AST_Node *node = create_node();
     node->tag = NODE_TYPE_IDENTIFIER;
@@ -168,7 +169,7 @@ struct AST_Node *block_node(struct AST_Node *statement)
     return node;
 }
 
-struct AST_Node *function_node(char *identifier, struct AST_Node *parameters, struct AST_Node *statements)
+struct AST_Node *function_node(struct SymbolTableEntry *identifier, struct AST_Node *parameters, struct AST_Node *statements)
 {
     struct AST_Node *node = create_node();
     node->tag = NODE_TYPE_FUNC_DEF;
