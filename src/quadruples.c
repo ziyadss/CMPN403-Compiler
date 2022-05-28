@@ -220,7 +220,7 @@ char *_condition(struct AST_Node *condition)
     char *ret = "JNE";
     switch (condition->tag)
     {
-    case NODE_TYPE_OPERATION:
+    case NODE_TYPE_OPERATION:; // code breaks without semicolon hehe
         char *name = _inv_cond_operation(condition, &ret);
         if (ret == NULL)
         {
