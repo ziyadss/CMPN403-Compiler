@@ -213,20 +213,52 @@ struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statemen
     return block;
 }
 
-extern struct AST_Node *program;
-
-void create_program()
+struct AST_Node *create_program()
 {
-    program = create_node();
+    struct AST_Node *program = create_node();
     assert(program != NULL);
     program->tag = NODE_TYPE_STATEMENTS;
     program->statements_count = 0;
     program->statements_capacity = 2;
     program->statements = malloc(sizeof(*program->statements) * program->statements_capacity);
     assert(program->statements != NULL);
+    return program;
 }
 
+extern struct AST_Node *program;
 void program_append(struct AST_Node *statement)
 {
     add_statement(program, statement);
+}
+
+void destroy_ast(struct AST_Node *root)
+{
+    if (root == NULL)
+        return;
+
+    switch (root->tag)
+    {
+    case NODE_TYPE_IF:
+        destroy_ast(root->condition);
+        destroy_ast(root->then_branch);
+        destroy_ast(root->else_branch);
+        break;
+    case NODE_TYPE_FUNC_DEF:
+    case NODE_TYPE_OPERATION:
+        destroy_ast(root->left);
+        destroy_ast(root->right);
+        break;
+    case NODE_TYPE_STATEMENTS:
+        for (unsigned int i = 0; i < root->statements_count; i++)
+            destroy_ast(root->statements[i]);
+
+        free(root->statements);
+        break;
+    case NODE_TYPE_STRING:
+        free(root->stringValue);
+        break;
+    default:
+        break;
+    }
+    free(root);
 }
