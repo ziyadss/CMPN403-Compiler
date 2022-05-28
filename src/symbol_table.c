@@ -101,18 +101,23 @@ void scope_up()
     // destroy_table(old_scope);
 }
 
-struct SymbolTableEntry *lookup(char *identifier)
+struct SymbolTableEntry *lookup(char *identifier, _Bool func)
 {
     struct SymbolTableEntry *found = search_tables(current_scope, identifier);
     // run checks, as parameters to lookup (const, init, func)
     // if found == NULL OR checks fail, return NULL;
     if (found == NULL)
-    {
         semantic_error = UNDECLARED_IDENTIFIER;
-        return NULL;
-    }
+    else if (found->is_init == 0)
+        semantic_error = UNINITIALIZED_IDENTIFIER;
+    else if (found->is_func == 0 && func == 1)
+        semantic_error = NOT_A_FUNCTION;
+    else if (found->is_func == 1 && func == 0)
+        semantic_error = IS_A_FUNCTION;
+    else
+        return found;
 
-    return found;
+    return NULL;
 }
 
 char *get_error_message()
@@ -125,6 +130,12 @@ char *get_error_message()
         return "Identifier already used";
     case UNDECLARED_IDENTIFIER:
         return "Identifier not declared";
+    case UNINITIALIZED_IDENTIFIER:
+        return "Identifier not initialized";
+    case NOT_A_FUNCTION:
+        return "Identifier is not a function";
+    case IS_A_FUNCTION:
+        return "Identifier is a function";
     default:
         return "Unknown error";
     }

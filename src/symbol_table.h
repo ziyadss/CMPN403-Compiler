@@ -47,7 +47,10 @@ enum SEMANTIC_ERROR
 {
     NO_ERROR,
     USED_IDENTIFIER,
-    UNDECLARED_IDENTIFIER
+    UNDECLARED_IDENTIFIER,
+    UNINITIALIZED_IDENTIFIER,
+    NOT_A_FUNCTION,
+    IS_A_FUNCTION
 };
 
 struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func);
