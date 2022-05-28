@@ -169,6 +169,13 @@ struct AST_Node *break_node()
     return node;
 }
 
+struct AST_Node *continue_node()
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_CONTINUE;
+    return node;
+}
+
 void create_program()
 {
     program = create_node();
