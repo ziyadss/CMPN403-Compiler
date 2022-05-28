@@ -1,8 +1,4 @@
-#pragma once
-#include <stdio.h>
-
-#include "ast.h"
-#include "symbol_table.h"
+#include "prints.h"
 
 extern struct SymbolTable *current_scope;
 extern struct AST_Node *program;
