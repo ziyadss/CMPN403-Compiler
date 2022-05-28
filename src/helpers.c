@@ -1,4 +1,6 @@
 #include "helpers.h"
+#define STB_DS_IMPLEMENTATION
+#include "stb_ds.h"
 
 int asprintf(char **ret, const char *format, ...)
 {
@@ -21,4 +23,10 @@ int asprintf(char **ret, const char *format, ...)
     }
 
     return count;
+}
+
+int* generateArray()
+{
+	int* Arr = NULL;
+	return Arr;
 }

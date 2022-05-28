@@ -1,10 +1,23 @@
 #include "symbol_table.h"
-
-#define STB_DS_IMPLEMENTATION
-#include "stb_ds.h"
+#include "helpers.h"
 
 struct SymbolTable *current_scope = NULL;
 enum SemanticError semantic_error = NO_ERROR;
+
+enum TYPE {
+	BOOL_TYPE,
+    CHAR_TYPE,
+    DOUBLE_TYPE,
+    FLOAT_TYPE,
+    INT_TYPE,
+    LONG_TYPE,
+    SHORT_TYPE,
+    SIGNED_TYPE,
+    STRING_TYPE,
+    UNSIGNED_TYPE,
+    VOID_TYPE,
+    ENUM_TYPE
+};
 
 unsigned int hash(char *string)
 {
@@ -63,7 +76,8 @@ struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init,
     }
 
     struct SymbolTableEntry *entry = malloc(sizeof(*entry));
-    assert(entry != NULL);
+    assert(entry != NULL)
+	{
 
     entry->name = identifier;
     entry->next = head;
@@ -78,6 +92,13 @@ struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init,
     semantic_error = NO_ERROR;
     return entry;
 }
+
+void insertParam(struct SymbolTableEntry* entry, enum TYPE type)
+{
+	arrput(entry->TYPES, type);
+	
+}
+
 
 void scope_down()
 {
@@ -126,6 +147,8 @@ void destroy_table(struct SymbolTable *table)
 
     free(table);
 }
+
+
 
 void destroy_global_table()
 {
