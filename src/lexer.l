@@ -3,6 +3,7 @@
 %}
 
 %option nounput noinput
+%option yylineno
 
 D   [0-9]
 H   [0-9a-fA-F]
@@ -122,7 +123,12 @@ H   [0-9a-fA-F]
                                         // Possible solution: Insert into symbol table, at end, loop over it and free strings.
                                     }
     /* Identifier. */
-[a-zA-Z_][a-zA-Z0-9_]*              return IDENTIFIER;
+[a-zA-Z_][a-zA-Z0-9_]*              { 
+                                        yylval.stringValue = malloc(yyleng + 1);    // Freed after use in parser.
+                                        strncpy(yylval.stringValue, yytext, yyleng);
+                                        yylval.stringValue[yyleng] = '\0';
+                                                                                        return IDENTIFIER;
+                                    }
 
 .                                   printf("Unmatched: '%s'\n", yytext);
 
