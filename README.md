@@ -11,10 +11,9 @@ Major differences include:
 - A 'try-catch-finally' block and a 'throw' statement.
 - A built-in string type.
 
-Currently in phase 1, this project consists of two phases:
+## Notes about generated quadruples
 
-- Lexer and parser rules.
-- TODO
+- Assumes the presence of four registers - retval, retadr, temp1, temp2.
 
 ## Building and Running
 

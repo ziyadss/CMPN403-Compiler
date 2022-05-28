@@ -1,15 +1,32 @@
+#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
-
-#include "quadruples.c"
 
 extern int yyparse();
 extern FILE *yyin;
-extern void scope_down();
-extern void scope_up();
-extern void create_program();
+extern FILE *output_file;
 
-struct SymbolTable *current_scope = NULL;
-struct AST_Node *program = NULL;
+extern void create_program();
+extern void scope_down();
+extern void quadruples();
+extern void destroy_global_table();
+extern void destroy_program();
+extern char *get_error_message();
+
+_Bool errored = 0;
+
+extern int yylineno;
+
+int yyerror(char *error)
+{
+    char *message = get_error_message();
+    message = message == NULL ? error : message;
+    assert(message != NULL);
+    fprintf(stderr, "Error on line %d: %s\n", yylineno, message);
+
+    errored = 1;
+    return 1;
+}
 
 int main(int argc, char **argv)
 {
@@ -32,13 +49,31 @@ int main(int argc, char **argv)
 
     yyparse();
 
-    scope_up();
-
     fclose(yyin);
 
-    quadruples("output.asm");
+    printf("Parsing complete.\n");
 
-    printf("\nParsing complete.\n");
+    if (!errored)
+    {
+        char *output_filename = "output.asm";
+        output_file = fopen(output_filename, "w");
+        if (output_file == NULL)
+        {
+            fprintf(stderr, "Error: Could not open file %s\n", output_filename);
+            return 1;
+        }
+
+        quadruples();
+
+        fclose(output_file);
+
+        printf("\nCode generation complete.\n");
+    }
+
+    destroy_global_table();
+    destroy_program();
+
+    printf("\nCleanup successful.\n");
 
     return 0;
 }

@@ -18,7 +18,8 @@ void main()
 
 
 /*
-
+main: 
+POP retadr
 MOV x, 10
 CMP x, 10
 JNE L1
@@ -35,6 +36,8 @@ L3:
 MOV b, x
 
 L4:
-L2:
 
+L2:
+PUSH retadr
+RET
 */

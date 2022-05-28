@@ -1,87 +1,6 @@
-#pragma once
+#include "ast.h"
 
-#include <assert.h>
-#include <stdlib.h>
-
-enum OPERATION
-{
-    TERNARY_OP,
-    COMMA_OP,
-    CALL_OP,
-    ADD_ASSIGN_OP,
-    AND_ASSIGN_OP,
-    ASSIGN_OP,
-    DIV_ASSIGN_OP,
-    MOD_ASSIGN_OP,
-    MUL_ASSIGN_OP,
-    OR_ASSIGN_OP,
-    SHL_ASSIGN_OP,
-    SHR_ASSIGN_OP,
-    SUB_ASSIGN_OP,
-    XOR_ASSIGN_OP,
-    ADD_OP,
-    AND_OP,
-    BIT_AND_OP,
-    BIT_NOT_OP,
-    BIT_OR_OP,
-    DEC_OP,
-    DIV_OP,
-    EQ_OP,
-    GE_OP,
-    GT_OP,
-    INC_OP,
-    LE_OP,
-    LT_OP,
-    MOD_OP,
-    MUL_OP,
-    NE_OP,
-    NOT_OP,
-    OR_OP,
-    SHL_OP,
-    SHR_OP,
-    SUB_OP,
-    XOR_OP
-};
-
-enum NODE_TYPE
-{
-    NODE_TYPE_FUNC_DEF,
-    NODE_TYPE_STATEMENTS,
-    NODE_TYPE_OPERATION,
-    NODE_TYPE_IDENTIFIER,
-    NODE_TYPE_INT,
-    NODE_TYPE_FLOAT,
-    NODE_TYPE_CHAR,
-    NODE_TYPE_STRING,
-    NODE_TYPE_BOOL
-};
-
-struct AST_Node
-{
-    union
-    {
-        struct
-        {
-            unsigned int statements_count, statements_capacity;
-            struct AST_Node **statements;
-        };
-
-        struct
-        {
-            enum OPERATION op;
-            struct AST_Node *left;
-            struct AST_Node *right;
-        };
-
-        int intValue;
-        double floatValue;
-        char charValue;
-        char *stringValue;
-        _Bool boolValue;
-    };
-    char *identifier;
-    enum NODE_TYPE tag;
-};
+struct AST_Node *program = NULL;
 
 struct AST_Node *create_node()
 {
@@ -90,7 +9,7 @@ struct AST_Node *create_node()
     return node;
 }
 
-struct AST_Node *identifier_node(char *identifier)
+struct AST_Node *identifier_node(struct SymbolTableEntry *identifier)
 {
     struct AST_Node *node = create_node();
     node->tag = NODE_TYPE_IDENTIFIER;
@@ -160,7 +79,7 @@ struct AST_Node *block_node(struct AST_Node *statement)
     return node;
 }
 
-struct AST_Node *function_node(char *identifier, struct AST_Node *parameters, struct AST_Node *statements)
+struct AST_Node *function_node(struct SymbolTableEntry *identifier, struct AST_Node *parameters, struct AST_Node *statements)
 {
     struct AST_Node *node = create_node();
     node->tag = NODE_TYPE_FUNC_DEF;
@@ -180,6 +99,26 @@ struct AST_Node *call_node(struct AST_Node *identifier, struct AST_Node *argumen
     return node;
 }
 
+struct AST_Node *if_node(struct AST_Node *condition, struct AST_Node *then_branch, struct AST_Node *else_branch)
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_IF;
+    node->condition = condition;
+    node->then_branch = then_branch;
+    node->else_branch = else_branch;
+    return node;
+}
+
+struct AST_Node *while_node(struct AST_Node *condition, struct AST_Node *body)
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_WHILE;
+    node->condition = condition;
+    node->then_branch = body;
+    node->else_branch = NULL;
+    return node;
+}
+
 struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statement)
 {
     assert(block->tag == NODE_TYPE_STATEMENTS);
@@ -193,8 +132,6 @@ struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statemen
     block->statements[block->statements_count++] = statement;
     return block;
 }
-
-extern struct AST_Node *program;
 
 void create_program()
 {
@@ -210,4 +147,41 @@ void create_program()
 void program_append(struct AST_Node *statement)
 {
     add_statement(program, statement);
+}
+
+void destroy_ast(struct AST_Node *root)
+{
+    if (root == NULL)
+        return;
+
+    switch (root->tag)
+    {
+    case NODE_TYPE_IF:
+    case NODE_TYPE_WHILE:
+        destroy_ast(root->condition);
+        destroy_ast(root->then_branch);
+        destroy_ast(root->else_branch);
+        break;
+    case NODE_TYPE_FUNC_DEF:
+    case NODE_TYPE_OPERATION:
+        destroy_ast(root->left);
+        destroy_ast(root->right);
+        break;
+    case NODE_TYPE_STATEMENTS:
+        for (unsigned int i = 0; i < root->statements_count; i++)
+            destroy_ast(root->statements[i]);
+        free(root->statements);
+        break;
+    case NODE_TYPE_STRING:
+        free(root->stringValue);
+        break;
+    default:
+        break;
+    }
+    free(root);
+}
+
+void destroy_program()
+{
+    destroy_ast(program);
 }

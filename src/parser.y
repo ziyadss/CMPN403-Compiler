@@ -1,14 +1,12 @@
 %{
     #include <stdio.h>
 
-    #include "../src/symbol_table_interface.c"
-    #include "../src/ast.c"
-    #include "../src/main.c"
+    #include "../src/quadruples.h"
+
+    extern int yyerror(const char *format, ...);
 
     int yylex();
-    int yyerror(const char *s) { fprintf(stderr, "Error: %s\n", s); return 1; }
     int yywrap() { return 1; }
-    extern int yylineno;
 %}
 
 %union
@@ -19,8 +17,7 @@
     char *stringValue;
     _Bool boolValue;
     struct AST_Node *nodePointer;
-    /* enum OPERATION operation; */
-    int operation;
+    int enumValue;
 }
 
     /* Keywords. */
@@ -48,21 +45,21 @@
 
 %type <nodePointer>literal
 
-%type <operation>unary_op assignment_op
+%type <enumValue>unary_op assignment_op type_modifier
 
 %type <nodePointer>initializer initializer_list function top_level_statement declaration
 %type <nodePointer>block_statement block_item_list statement 
 
 %type <nodePointer>parameter parameter_list
 %type <stringValue>function_declaration parameterized_identifier
-%type <nodePointer>jump_statement
-// selection_statement iteration_statement jump_statement try_statement
+%type <nodePointer>jump_statement selection_statement iteration_statement
 
 %%
 
     /* A program consists of a number of top level statements. */
-program                 : program top_level_statement                   { program_append($2); }
-                        | top_level_statement                           { program_append($1); }
+program                 : error SEMICOLON                           { yyerror("Error: \n"); }
+                        | program top_level_statement               { program_append($2); }
+                        | top_level_statement                       { program_append($1); }
                         ;
 
     /* Top level statements only declare or define functions and other language constructs (variables, enums, etc.). */
@@ -81,8 +78,8 @@ initializer_list        : initializer_list COMMA initializer        { $$ = opera
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { insert($1, 0, 1, 0); $$ = operation_node(ASSIGN_OP, identifier_node($1), $3); }
-                        | IDENTIFIER                                { insert($1, 0, 0, 0); $$ = identifier_node($1); }
+initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0)), $3); }
+                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0)); }
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
@@ -93,10 +90,10 @@ parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                  
 function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = $2; }
                         ;
 
-function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); identifier_node($1); insert($1, 1, 1, 1); $$ = function_node($1, $2, $4); }
-                        | function_declaration { scope_down(); } block_statement            { scope_up(); identifier_node($1); insert($1, 1, 1, 1); $$ = function_node($1, NULL, $3); }
-                        | parameterized_identifier parameter_list RPAREN RPAREN SEMICOLON   { scope_up(); identifier_node($1); insert($1, 1, 0, 1); $$ = function_node($1, $2, NULL); }
-                        | function_declaration SEMICOLON                                    {             identifier_node($1); insert($1, 1, 0, 1); $$ = function_node($1, NULL, NULL); }
+function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); $$ = function_node(insert($1, 1, 1, 1), $2, $4); }
+                        | function_declaration { scope_down(); } block_statement            { scope_up(); $$ = function_node(insert($1, 1, 1, 1), NULL, $3); }
+                        | parameterized_identifier parameter_list RPAREN RPAREN SEMICOLON   { scope_up(); $$ = function_node(insert($1, 1, 0, 1), $2, NULL); }
+                        | function_declaration SEMICOLON                                    {             $$ = function_node(insert($1, 1, 0, 1), NULL, NULL); }
                         ;
 
     /* A parameter list is a comma-separated list of parameters. */
@@ -124,12 +121,12 @@ expression              : expression COMMA assign_expression            { $$ = o
                         ;
 
     /* An assignment expression is either an assignment expression or decays to a ternary expression. */
-assign_expression       : IDENTIFIER assignment_op assign_expression    { $$ = operation_node($2, identifier_node($1), $3); }
+assign_expression       : IDENTIFIER assignment_op assign_expression    { struct SymbolTableEntry* symbol = lookup($1); if (symbol == NULL) YYERROR; else $$ = operation_node($2, identifier_node(symbol), $3); }
                         | ternary_expression
                         ;
 
     /* An ternary expression is either a ternary expression or decays to a logical or expression. */
-ternary_expression      : or_expression QUESTION expression COLON ternary_expression    { printf("Unreachable\n"); }
+ternary_expression      : or_expression QUESTION expression COLON ternary_expression    { $$ = if_node($1, $3, $5); }
                         | or_expression
                         ;
 
@@ -199,12 +196,12 @@ prefix_expression       : unary_op prefix_expression                    { $$ = o
     /* A postfix expression is either a postfix expression (including a function call) or decays to a base expression. */
 postfix_expression      : postfix_expression INC                        { $$ = operation_node(INC_OP, $1, NULL); }
                         | postfix_expression DEC                        { $$ = operation_node(DEC_OP, $1, NULL); }
-                        | IDENTIFIER LPAREN optional_expression RPAREN  { $$ = call_node(identifier_node($1), $3); }
+                        | IDENTIFIER LPAREN optional_expression RPAREN  { struct SymbolTableEntry* symbol = lookup($1); if (symbol == NULL) YYERROR; else $$ = call_node(identifier_node(symbol), $3); }
                         | base_expression
                         ;
 
     /* A base expression is either an identifier, a literal, or a parenthesized optional expression. */
-base_expression         : IDENTIFIER                                    { $$ = identifier_node($1); }
+base_expression         : IDENTIFIER                                    { struct SymbolTableEntry* symbol = lookup($1); if (symbol == NULL) YYERROR; else $$ = identifier_node(symbol); }
                         | literal
                         | LPAREN optional_expression RPAREN             { $$ = $2; }
                         ;
@@ -218,10 +215,10 @@ optional_expression     : expression
 
     /* A statement is one of a block, selection, iteration, jump, a semicolon optionally preceded by an expression, a try or a declaration followed by a semicolon. */
 statement               : { scope_down(); } block_statement  { scope_up(); $$ = $2; }
-                        | selection_statement               { $$ = NULL; }
-                        | iteration_statement               { $$ = NULL; }
-                        | try_statement                     { $$ = NULL; }
+                        | selection_statement
+                        | iteration_statement
                         | jump_statement
+                        | try_statement                     { $$ = NULL; }
                         | optional_expression SEMICOLON
                         | declaration SEMICOLON
                         ;
@@ -237,9 +234,9 @@ block_item_list         : block_item_list statement             { $$ = add_state
                         ;
 
     /* Selection statements are IFs and SWITCHes. */
-selection_statement     : IF LPAREN expression RPAREN statement %prec IF
-                        | IF LPAREN expression RPAREN statement ELSE statement
-                        | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE
+selection_statement     : IF LPAREN expression RPAREN statement %prec IF                    { $$ = if_node($3, $5, NULL); }
+                        | IF LPAREN expression RPAREN statement ELSE statement              { $$ = if_node($3, $5, $7); }
+                        | SWITCH LPAREN expression RPAREN LBRACE switch_case_list RBRACE    { $$ = NULL; }
                         ;
 
     /* A switch case list is a sequence of switch cases. */
@@ -253,16 +250,16 @@ switch_case             : CASE ternary_expression COLON block_item_list
                         ;
 
     /* Iteration statements are WHILEs and DO WHILES and FORs */
-iteration_statement     : WHILE LPAREN expression RPAREN statement
-                        | DO statement WHILE LPAREN expression RPAREN SEMICOLON
-                        | FOR LPAREN optional_expression SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement
-                        | FOR LPAREN declaration SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement
+iteration_statement     : WHILE LPAREN expression RPAREN statement                                  { $$ = while_node($3, $5); }
+                        | DO statement WHILE LPAREN expression RPAREN SEMICOLON                     { $$ = NULL; }
+                        | FOR LPAREN optional_expression SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement { $$ = NULL; }
+                        | FOR LPAREN declaration SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement { $$ = NULL; }
                         ;
 
     /* Jump statements are ones which affect control flow. */
 jump_statement          : CONTINUE SEMICOLON                                { $$ = NULL; }
                         | BREAK SEMICOLON                                   { $$ = NULL; }
-                        | RETURN optional_expression SEMICOLON              { $$ = operation_node(ASSIGN_OP, identifier_node("retval"), $2); }
+                        | RETURN optional_expression SEMICOLON              { $$ = operation_node(RET_OP, $2, NULL); }
                         | THROW optional_expression SEMICOLON               { $$ = $2; }
                         ;
 
@@ -295,18 +292,18 @@ type_modifier_list      : type_modifier_list type_modifier
                         ;
 
     /* A type modifier is a data type. */
-type_modifier           : BOOL
-                        | CHAR
-                        | DOUBLE
-                        | FLOAT
-                        | INT
-                        | LONG
-                        | SHORT
-                        | SIGNED
-                        | STRING
-                        | UNSIGNED
-                        | VOID
-                        | enum_type
+type_modifier           : BOOL                  { $$ = BOOL_TYPE; }
+                        | CHAR                  { $$ = CHAR_TYPE; }
+                        | DOUBLE                { $$ = DOUBLE_TYPE; }
+                        | FLOAT                 { $$ = FLOAT_TYPE; }
+                        | INT                   { $$ = INT_TYPE; }
+                        | LONG                  { $$ = LONG_TYPE; }
+                        | SHORT                 { $$ = SHORT_TYPE; }
+                        | SIGNED                { $$ = SIGNED_TYPE; }
+                        | STRING                { $$ = STRING_TYPE; }
+                        | UNSIGNED              { $$ = UNSIGNED_TYPE; }
+                        | VOID                  { $$ = VOID_TYPE; }
+                        | enum_type             { $$ = ENUM_TYPE; }
                         ;
 
     /* An enum type is ENUM followed by an identifier, or an (optionally anonymous) enum declaration. */

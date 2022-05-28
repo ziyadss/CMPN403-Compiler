@@ -1,14 +1,18 @@
 #pragma once
 #include <stdio.h>
 
-#include "ast.c"
+#include "ast.h"
+#include "symbol_table.h"
+
+extern struct SymbolTable *current_scope;
+extern struct AST_Node *program;
 
 void print_node(struct AST_Node *statement)
 {
     switch (statement->tag)
     {
     case NODE_TYPE_IDENTIFIER:
-        printf("%s", statement->identifier);
+        printf("%s", statement->identifier->name);
         break;
     case NODE_TYPE_INT:
         printf("%d", statement->intValue);
@@ -134,10 +138,10 @@ void print_node(struct AST_Node *statement)
         printf("\nBLOCK END");
         break;
     case NODE_TYPE_FUNC_DEF:
-        printf("FUNCTION %s START\n", statement->identifier);
+        printf("FUNCTION %s START\n", statement->identifier->name);
         print_node(statement->left);
         print_node(statement->right);
-        printf("\nFUNCTION %s END\n", statement->identifier);
+        printf("\nFUNCTION %s END\n", statement->identifier->name);
         break;
     default:
         fprintf(stderr, "Unknown node type: %d\n", statement->tag);
@@ -150,14 +154,14 @@ void print_program()
     printf("\nPROGRAM START\n");
     for (unsigned int i = 0; i < program->statements_count; i++)
     {
-        struct AST_Node* statement = program->statements[i];
+        struct AST_Node *statement = program->statements[i];
         switch (statement->tag)
         {
         case NODE_TYPE_OPERATION:
             printf("\n\nTop level statement %d, a declaration:\n", i);
             print_node(statement);
             break;
-        case NODE_TYPE_STATEMENTS:
+        case NODE_TYPE_FUNC_DEF:
             printf("\n\nTop level statement %d, a function: \n", i);
             print_node(statement);
             break;
@@ -167,4 +171,25 @@ void print_program()
         }
     }
     printf("\nPROGRAM END\n");
+}
+
+void print_table(unsigned int line)
+{
+    struct SymbolTable *table = current_scope;
+    printf("\nAt line %d, current table: ", line);
+    while (table != NULL)
+    {
+        for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
+        {
+            struct SymbolTableEntry *head = table->buckets[i];
+            while (head != NULL)
+            {
+                printf("%s, ", head->name);
+                head = head->next;
+            }
+        }
+        printf("\nParent: ");
+        table = table->parent;
+    }
+    printf("Global Scope\n\n");
 }
