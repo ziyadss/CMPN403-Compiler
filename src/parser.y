@@ -1,12 +1,11 @@
 %{
     #include <stdio.h>
 
-    #include "../src/symbol_table_interface.c"
-    #include "../src/ast.c"
-    #include "../src/main.c"
+    #include "../src/quadruples.h"
+
+    extern int yyerror(const char *format, ...);
 
     int yylex();
-    int yyerror(const char *s) { fprintf(stderr, "Error: %s\n", s); return 1; }
     int yywrap() { return 1; }
     extern int yylineno;
 %}
@@ -65,7 +64,8 @@ program                 : program top_level_statement                   { progra
                         ;
 
     /* Top level statements only declare or define functions and other language constructs (variables, enums, etc.). */
-top_level_statement     : declaration SEMICOLON
+top_level_statement     : error SEMICOLON                     { yyerror("Invalid top level statement at line %d\n", yylineno); yyerrok;}
+                        | declaration SEMICOLON
                         | function
                         ;
 

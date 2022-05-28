@@ -1,16 +1,24 @@
+#include <stdarg.h>
 #include <stdio.h>
-
-#include "quadruples.c"
 
 extern int yyparse();
 extern FILE *yyin;
-extern void scope_down();
-extern void scope_up();
-struct AST_Node *create_program();
+extern FILE *output_file;
 
-struct SymbolTable *current_scope = NULL;
-struct AST_Node *program = NULL;
-enum SemanticError semantic_error = NO_ERROR;
+extern void create_program();
+extern void scope_down();
+extern void quadruples();
+extern void destroy_global_table();
+extern void destroy_program();
+
+int yyerror(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    return 1;
+}
 
 int main(int argc, char **argv)
 {
@@ -27,9 +35,9 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    program = create_program();
+    create_program();
 
-    current_scope = create_table();
+    scope_down();
 
     yyparse();
 
@@ -37,12 +45,22 @@ int main(int argc, char **argv)
 
     printf("Parsing complete.\n");
 
-    quadruples("output.asm");
+    char *output_filename = "output.asm";
+    output_file = fopen(output_filename, "w");
+    if (output_file == NULL)
+    {
+        fprintf(stderr, "Error: Could not open file %s\n", output_filename);
+        return 1;
+    }
+
+    quadruples();
+
+    fclose(output_file);
 
     printf("\nCode generation complete.\n");
 
-    destroy_table(current_scope);
-    destroy_ast(program);
+    destroy_global_table();
+    destroy_program();
 
     printf("\nCleanup successful.\n");
 

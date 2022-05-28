@@ -1,7 +1,4 @@
-#pragma once
-
-#include "ast_print.c"
-#include "helpers.c"
+#include "quadruples.h"
 
 FILE *output_file = NULL;
 
@@ -608,11 +605,9 @@ char *_operation(struct AST_Node *operation, _Bool left)
     return ret;
 }
 
-void quadruples(char *filename)
+extern struct AST_Node* program;
+void quadruples()
 {
-    output_file = fopen(filename, "w");
-    assert(output_file != NULL);
-
     for (unsigned int i = 0; i < program->statements_count; i++)
     {
         struct AST_Node *node = program->statements[i];
@@ -633,6 +628,4 @@ void quadruples(char *filename)
         }
         fprintf(output_file, "\n");
     }
-
-    fclose(output_file);
 }

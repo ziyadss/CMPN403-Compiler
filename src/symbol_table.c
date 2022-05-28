@@ -1,46 +1,10 @@
-#pragma once
-
-#define ST_ARRAY_SIZE 1
-#define HASH_SEED 0
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+#include "symbol_table.h"
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 
-// template el ghalaba - abdo
-#define MAP_KV(T, Name)       \
-    typedef struct Map_##Name \
-    {                         \
-        char *key;            \
-        T value;              \
-    } Map_##Name##_El, *Map_##Name
-
-enum TYPE
-{
-    INT_TYPE
-    /*...*/
-};
-
-struct SymbolTableEntry
-{
-    char *name;
-    enum TYPE *TYPES;
-    _Bool is_init;
-    _Bool is_used;
-    _Bool is_func;
-    _Bool is_const;
-
-    struct SymbolTableEntry *next;
-};
-
-struct SymbolTable
-{
-    struct SymbolTableEntry *buckets[ST_ARRAY_SIZE];
-
-    struct SymbolTable *parent;
-};
+struct SymbolTable *current_scope = NULL;
+enum SemanticError semantic_error = NO_ERROR;
 
 unsigned int hash(char *string)
 {
@@ -87,6 +51,66 @@ struct SymbolTable *create_table()
     return table;
 }
 
+struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func)
+{
+    unsigned int bucket = hash(identifier);
+    struct SymbolTableEntry *head = current_scope->buckets[bucket];
+
+    if (search_bucket(head, identifier) != NULL)
+    {
+        semantic_error = USED_IDENTIFIER;
+        return NULL;
+    }
+
+    struct SymbolTableEntry *entry = malloc(sizeof(*entry));
+    assert(entry != NULL);
+
+    entry->name = identifier;
+    entry->next = head;
+    entry->TYPES = NULL;
+    entry->is_init = is_init;
+    entry->is_used = 0;
+    entry->is_func = is_func;
+    entry->is_const = is_const;
+
+    current_scope->buckets[bucket] = entry;
+
+    semantic_error = NO_ERROR;
+    return entry;
+}
+
+void scope_down()
+{
+    struct SymbolTable *new_scope = create_table();
+    new_scope->parent = current_scope;
+    current_scope = new_scope;
+}
+
+void scope_up()
+{
+    struct SymbolTable *old_scope = current_scope;
+    current_scope = old_scope->parent;
+    // destroy_table(old_scope);
+}
+
+struct SymbolTableEntry *lookup(char *identifier)
+{
+    struct SymbolTableEntry *found = search_tables(current_scope, identifier);
+    // run checks, as parameters to lookup (const, init, func)
+    // if found == NULL OR checks fail, return NULL;
+    if (found == NULL)
+    {
+        semantic_error = USED_IDENTIFIER;
+// yyerror("Error: Identifier %s used on line %d, before declaration\n", yylineno, identifier);
+#ifdef YYERROR
+        YYERROR;
+        printf("Yes.\n");
+#endif
+    }
+
+    return found;
+}
+
 void destroy_table(struct SymbolTable *table)
 {
     for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
@@ -103,7 +127,7 @@ void destroy_table(struct SymbolTable *table)
     free(table);
 }
 
-// TODO: A hash function that produces the same hash for identical strings.
-//  Note that ST_ARRAY_SIZE is currently set to 1 so that there is only one bucket.
-
-// TODO: SymbolTableEntry properties
+void destroy_global_table()
+{
+    destroy_table(current_scope);
+}

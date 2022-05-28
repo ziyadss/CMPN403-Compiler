@@ -1,96 +1,6 @@
-#pragma once
+#include "ast.h"
 
-#include <assert.h>
-#include <stdlib.h>
-#include "symbol_table_interface.c"
-
-enum OPERATION
-{
-    RET_OP,
-    COMMA_OP,
-    CALL_OP,
-    ADD_ASSIGN_OP,
-    AND_ASSIGN_OP,
-    ASSIGN_OP,
-    DIV_ASSIGN_OP,
-    MOD_ASSIGN_OP,
-    MUL_ASSIGN_OP,
-    OR_ASSIGN_OP,
-    SHL_ASSIGN_OP,
-    SHR_ASSIGN_OP,
-    SUB_ASSIGN_OP,
-    XOR_ASSIGN_OP,
-    ADD_OP,
-    AND_OP,
-    BIT_AND_OP,
-    BIT_NOT_OP,
-    BIT_OR_OP,
-    DEC_OP,
-    DIV_OP,
-    EQ_OP,
-    GE_OP,
-    GT_OP,
-    INC_OP,
-    LE_OP,
-    LT_OP,
-    MOD_OP,
-    MUL_OP,
-    NE_OP,
-    NOT_OP,
-    OR_OP,
-    SHL_OP,
-    SHR_OP,
-    SUB_OP,
-    XOR_OP
-};
-
-enum NODE_TYPE
-{
-    NODE_TYPE_IF,
-    NODE_TYPE_FUNC_DEF,
-    NODE_TYPE_STATEMENTS,
-    NODE_TYPE_OPERATION,
-    NODE_TYPE_IDENTIFIER,
-    NODE_TYPE_INT,
-    NODE_TYPE_FLOAT,
-    NODE_TYPE_CHAR,
-    NODE_TYPE_STRING,
-    NODE_TYPE_BOOL
-};
-
-struct AST_Node
-{
-    union
-    {
-        struct
-        {
-            struct AST_Node *condition;
-            struct AST_Node *then_branch;
-            struct AST_Node *else_branch;
-        };
-
-        struct
-        {
-            unsigned int statements_count, statements_capacity;
-            struct AST_Node **statements;
-        };
-
-        struct
-        {
-            enum OPERATION op;
-            struct AST_Node *left;
-            struct AST_Node *right;
-        };
-
-        int intValue;
-        double floatValue;
-        char charValue;
-        char *stringValue;
-        _Bool boolValue;
-    };
-    struct SymbolTableEntry *identifier;
-    enum NODE_TYPE tag;
-};
+struct AST_Node *program = NULL;
 
 struct AST_Node *create_node()
 {
@@ -213,19 +123,17 @@ struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statemen
     return block;
 }
 
-struct AST_Node *create_program()
+void create_program()
 {
-    struct AST_Node *program = create_node();
+    program = create_node();
     assert(program != NULL);
     program->tag = NODE_TYPE_STATEMENTS;
     program->statements_count = 0;
     program->statements_capacity = 2;
     program->statements = malloc(sizeof(*program->statements) * program->statements_capacity);
     assert(program->statements != NULL);
-    return program;
 }
 
-extern struct AST_Node *program;
 void program_append(struct AST_Node *statement)
 {
     add_statement(program, statement);
@@ -260,4 +168,9 @@ void destroy_ast(struct AST_Node *root)
         break;
     }
     free(root);
+}
+
+void destroy_program()
+{
+    destroy_ast(program);
 }

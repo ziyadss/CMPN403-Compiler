@@ -1,7 +1,11 @@
 #pragma once
 #include <stdio.h>
 
-#include "ast.c"
+#include "ast.h"
+#include "symbol_table.h"
+
+extern struct SymbolTable *current_scope;
+extern struct AST_Node *program;
 
 void print_node(struct AST_Node *statement)
 {
@@ -150,7 +154,7 @@ void print_program()
     printf("\nPROGRAM START\n");
     for (unsigned int i = 0; i < program->statements_count; i++)
     {
-        struct AST_Node* statement = program->statements[i];
+        struct AST_Node *statement = program->statements[i];
         switch (statement->tag)
         {
         case NODE_TYPE_OPERATION:
@@ -167,4 +171,25 @@ void print_program()
         }
     }
     printf("\nPROGRAM END\n");
+}
+
+void print_table(unsigned int line)
+{
+    struct SymbolTable *table = current_scope;
+    printf("\nAt line %d, current table: ", line);
+    while (table != NULL)
+    {
+        for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
+        {
+            struct SymbolTableEntry *head = table->buckets[i];
+            while (head != NULL)
+            {
+                printf("%s, ", head->name);
+                head = head->next;
+            }
+        }
+        printf("\nParent: ");
+        table = table->parent;
+    }
+    printf("Global Scope\n\n");
 }
