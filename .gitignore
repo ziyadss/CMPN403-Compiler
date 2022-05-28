@@ -2,3 +2,4 @@ build
 bin
 .vscode
 output.asm
+tests/sources/test.c

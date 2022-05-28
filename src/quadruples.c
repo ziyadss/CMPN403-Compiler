@@ -566,6 +566,8 @@ char *_operation(struct AST_Node *operation, _Bool left)
         fprintf(output_file, "PUSH retadr\nRET\n");
         break;
     case COMMA_OP:
+        _node(operation->left, 1, 0, 0, 0);
+        _node(operation->right, 0, 0, 0, 0);
         break;
     case CALL_OP:
         _parameters_push(operation->right);
