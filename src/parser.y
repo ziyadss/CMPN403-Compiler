@@ -261,7 +261,7 @@ iteration_statement     : WHILE LPAREN expression RPAREN statement
     /* Jump statements are ones which affect control flow. */
 jump_statement          : CONTINUE SEMICOLON                                { $$ = NULL; }
                         | BREAK SEMICOLON                                   { $$ = NULL; }
-                        | RETURN optional_expression SEMICOLON              { $$ = operation_node(ASSIGN_OP, identifier_node("retval"), $2); }
+                        | RETURN optional_expression SEMICOLON              { $$ = operation_node(RET_OP, $2, NULL); }
                         | THROW optional_expression SEMICOLON               { $$ = $2; }
                         ;
 

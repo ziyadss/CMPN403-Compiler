@@ -8,7 +8,7 @@ FILE *output_file = NULL;
 char *_operation(struct AST_Node *operation, _Bool left);
 void _operation_dst(char *identifier, struct AST_Node *operation);
 char *_node(struct AST_Node *statement, _Bool left, _Bool ternary);
-void _block(struct AST_Node *block);
+char *_block(struct AST_Node *block);
 
 char *_gen_label()
 {
@@ -315,10 +315,12 @@ char *_node(struct AST_Node *statement, _Bool left, _Bool ternary)
     return ret;
 }
 
-void _block(struct AST_Node *block)
+char *_block(struct AST_Node *block)
 {
-    for (unsigned int i = 0; i < block->statements_count; i++)
+    for (unsigned int i = 0; i < block->statements_count - 1; i++)
         _node(block->statements[i], 1, 0);
+
+    return _node(block->statements[block->statements_count - 1], 1, 0);
 }
 
 void _operation_dst(char *identifier, struct AST_Node *operation)
@@ -456,6 +458,17 @@ char *_operation(struct AST_Node *operation, _Bool left)
     char *lbl1, *lbl2;
     switch (operation->op)
     {
+    case RET_OP:
+        ret = "retval";
+        if (operation->left != NULL)
+        {
+            if (operation->left->tag == NODE_TYPE_OPERATION)
+                _operation_dst(ret, operation->left);
+            else
+                fprintf(output_file, "MOV %s, %s\n", ret, _node(operation->left, 1, 1));
+        }
+        fprintf(output_file, "PUSH retadr\nRET\n");
+        break;
     case COMMA_OP:
         break;
     case CALL_OP:
@@ -611,8 +624,8 @@ void quadruples(char *filename)
         case NODE_TYPE_FUNC_DEF:
             fprintf(output_file, "%s: \nPOP retadr\n", node->identifier);
             _parameters_pop(node->left);
-            _block(node->right);
-            fprintf(output_file, "PUSH retadr\nRET\n");
+            if (strcmp(_block(node->right), "retval") != 0)
+                fprintf(output_file, "PUSH retadr\nRET\n");
             break;
         default:
             fprintf(stderr, "Invalid top level statement: %d\n", node->tag);
