@@ -9,12 +9,10 @@ void _operation_dst(char *identifier, struct AST_Node *operation);
 char *_node(struct AST_Node *statement, _Bool left, _Bool ternary);
 char *_block(struct AST_Node *block);
 
-char *_gen_label()
+int _label_count()
 {
     static int label_count = 1;
-    char *label;
-    asprintf(&label, "L%d", label_count++);
-    return label;
+    return label_count++;
 }
 
 void _parameters_pop(struct AST_Node *parameters)
@@ -51,7 +49,7 @@ char *_inv_cond_operation(struct AST_Node *operation, char **jmp)
 {
     char *name = "temp1";
     *jmp = NULL;
-    char *lbl1, *lbl2;
+    int lbl1, lbl2;
     switch (operation->op)
     {
     case CALL_OP:
@@ -111,12 +109,10 @@ char *_inv_cond_operation(struct AST_Node *operation, char **jmp)
         break;
     case AND_OP:
         fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1, 1));
-        lbl1 = _gen_label();
-        fprintf(output_file, "JE %s\nCMP %s, 0\nJE %s\nMOV %s, 1\n", lbl1, _node(operation->right, 1, 1), lbl1, name);
-        lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\nMOV %s, 0\n\n%s:\n", lbl2, lbl1, name, lbl2);
-        free(lbl1);
-        free(lbl2);
+        lbl1 = _label_count();
+        fprintf(output_file, "JE L%d\nCMP %s, 0\nJE L%d\nMOV %s, 1\n", lbl1, _node(operation->right, 1, 1), lbl1, name);
+        lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\nMOV %s, 0\n\nL%d:\n", lbl2, lbl1, name, lbl2);
         break;
     case BIT_AND_OP:
         fprintf(output_file, "AND %s, %s, %s\n", name, _node(operation->left, 1, 1), _node(operation->right, 0, 1));
@@ -168,21 +164,17 @@ char *_inv_cond_operation(struct AST_Node *operation, char **jmp)
         break;
     case NOT_OP:
         fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1, 1));
-        lbl1 = _gen_label();
-        fprintf(output_file, "JE %s\nMOV %s, 0\n", lbl1, name);
-        lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\nMOV %s, 1\n\n%s:\n", lbl2, lbl1, name, lbl2);
-        free(lbl1);
-        free(lbl2);
+        lbl1 = _label_count();
+        fprintf(output_file, "JE L%d\nMOV %s, 0\n", lbl1, name);
+        lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\nMOV %s, 1\n\nL%d:\n", lbl2, lbl1, name, lbl2);
         break;
     case OR_OP:
         fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1, 1));
-        lbl1 = _gen_label();
-        fprintf(output_file, "JNE %s\nCMP %s, 0\nJNE %s\nMOV %s, 0\n", lbl1, _node(operation->right, 1, 1), lbl1, name);
-        lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\nMOV %s, 1\n\n%s:\n", lbl2, lbl1, name, lbl2);
-        free(lbl1);
-        free(lbl2);
+        lbl1 = _label_count();
+        fprintf(output_file, "JNE L%d\nCMP %s, 0\nJNE L%d\nMOV %s, 0\n", lbl1, _node(operation->right, 1, 1), lbl1, name);
+        lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\nMOV %s, 1\n\nL%d:\n", lbl2, lbl1, name, lbl2);
         break;
     case SHL_OP:
         fprintf(output_file, "SHL %s, %s, %s\n", name, _node(operation->left, 1, 1), _node(operation->right, 0, 1));
@@ -246,8 +238,8 @@ char *_if(struct AST_Node *statement, _Bool ternary)
 {
     char *dst = "temp1";
     char *jmp = _condition(statement->condition);
-    char *lbl1 = _gen_label();
-    fprintf(output_file, "%s %s\n", jmp, lbl1);
+    int lbl1 = _label_count();
+    fprintf(output_file, "%s L%d\n", jmp, lbl1);
     char *src = _node(statement->then_branch, 1, 0);
     if (ternary)
     {
@@ -257,22 +249,31 @@ char *_if(struct AST_Node *statement, _Bool ternary)
 
     if (statement->else_branch != NULL)
     {
-        char *lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\n", lbl2, lbl1);
+        int lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\n", lbl2, lbl1);
         src = _node(statement->else_branch, 1, 0);
         if (ternary)
         {
             assert(src != NULL);
             fprintf(output_file, "MOV %s, %s\n", dst, src);
         }
-        fprintf(output_file, "\n%s:\n", lbl2);
-        free(lbl2);
+        fprintf(output_file, "\nL%d:\n", lbl2);
     }
     else
-        fprintf(output_file, "\n%s:\n", lbl1);
+        fprintf(output_file, "\nL%d:\n", lbl1);
 
-    free(lbl1);
     return dst;
+}
+
+void _while(struct AST_Node *statement)
+{
+    int lbl1 = _label_count();
+    fprintf(output_file, "L%d:\n", lbl1);   
+    char *jmp = _condition(statement->condition);
+    int lbl2 = _label_count();
+    fprintf(output_file, "%s L%d\n", jmp, lbl2);
+    _node(statement->then_branch, 1, 0);
+    fprintf(output_file, "JMP L%d\n\nL%d:\n", lbl1, lbl2);
 }
 
 char *_node(struct AST_Node *statement, _Bool left, _Bool ternary)
@@ -282,6 +283,9 @@ char *_node(struct AST_Node *statement, _Bool left, _Bool ternary)
     {
     case NODE_TYPE_IF:
         ret = _if(statement, ternary);
+        break;
+    case NODE_TYPE_WHILE:
+        _while(statement);
         break;
     case NODE_TYPE_STATEMENTS:
         _block(statement);
@@ -324,7 +328,7 @@ char *_block(struct AST_Node *block)
 
 void _operation_dst(char *identifier, struct AST_Node *operation)
 {
-    char *lbl1, *lbl2;
+    int lbl1, lbl2;
     switch (operation->op)
     {
     case COMMA_OP:
@@ -372,12 +376,10 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         break;
     case AND_OP:
         fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1, 1));
-        lbl1 = _gen_label();
-        fprintf(output_file, "JE %s\nCMP %s, 0\nJE %s\nMOV %s, 1\n", lbl1, _node(operation->right, 1, 1), lbl1, identifier);
-        lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\nMOV %s, 0\n\n%s:\n", lbl2, lbl1, identifier, lbl2);
-        free(lbl1);
-        free(lbl2);
+        lbl1 = _label_count();
+        fprintf(output_file, "JE L%d\nCMP %s, 0\nJE L%d\nMOV %s, 1\n", lbl1, _node(operation->right, 1, 1), lbl1, identifier);
+        lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\nMOV %s, 0\n\nL%d:\n", lbl2, lbl1, identifier, lbl2);
         break;
     case BIT_AND_OP:
         fprintf(output_file, "AND %s, %s, %s\n", identifier, _node(operation->left, 1, 1), _node(operation->right, 0, 1));
@@ -417,21 +419,17 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         break;
     case NOT_OP:
         fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1, 1));
-        lbl1 = _gen_label();
-        fprintf(output_file, "JE %s\nMOV %s, 0\n", lbl1, identifier);
-        lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\nMOV %s, 1\n\n%s:\n", lbl2, lbl1, identifier, lbl2);
-        free(lbl1);
-        free(lbl2);
+        lbl1 = _label_count();
+        fprintf(output_file, "JE L%d\nMOV %s, 0\n", lbl1, identifier);
+        lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\nMOV %s, 1\n\nL%d:\n", lbl2, lbl1, identifier, lbl2);
         break;
     case OR_OP:
         fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1, 1));
-        lbl1 = _gen_label();
-        fprintf(output_file, "JNE %s\nCMP %s, 0\nJNE %s\nMOV %s, 0\n", lbl1, _node(operation->right, 1, 1), lbl1, identifier);
-        lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\nMOV %s, 1\n\n%s:\n", lbl2, lbl1, identifier, lbl2);
-        free(lbl1);
-        free(lbl2);
+        lbl1 = _label_count();
+        fprintf(output_file, "JNE L%d\nCMP %s, 0\nJNE L%d\nMOV %s, 0\n", lbl1, _node(operation->right, 1, 1), lbl1, identifier);
+        lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\nMOV %s, 1\n\nL%d:\n", lbl2, lbl1, identifier, lbl2);
         break;
     case SHL_OP:
         fprintf(output_file, "SHL %s, %s, %s\n", identifier, _node(operation->left, 1, 1), _node(operation->right, 0, 1));
@@ -454,7 +452,7 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
 char *_operation(struct AST_Node *operation, _Bool left)
 {
     char *ret = left ? "temp1" : "temp2";
-    char *lbl1, *lbl2;
+    int lbl1, lbl2;
     switch (operation->op)
     {
     case RET_OP:
@@ -526,12 +524,10 @@ char *_operation(struct AST_Node *operation, _Bool left)
         break;
     case AND_OP:
         fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1, 1));
-        lbl1 = _gen_label();
-        fprintf(output_file, "JE %s\nCMP %s, 0\nJE %s\nMOV %s, 1\n", lbl1, _node(operation->right, 1, 1), lbl1, ret);
-        lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\nMOV %s, 0\n\n%s:\n", lbl2, lbl1, ret, lbl2);
-        free(lbl1);
-        free(lbl2);
+        lbl1 = _label_count();
+        fprintf(output_file, "JE L%d\nCMP %s, 0\nJE L%d\nMOV %s, 1\n", lbl1, _node(operation->right, 1, 1), lbl1, ret);
+        lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\nMOV %s, 0\n\nL%d:\n", lbl2, lbl1, ret, lbl2);
         break;
     case BIT_AND_OP:
         fprintf(output_file, "AND %s, %s, %s\n", ret, _node(operation->left, 1, 1), _node(operation->right, 0, 1));
@@ -571,21 +567,17 @@ char *_operation(struct AST_Node *operation, _Bool left)
         break;
     case NOT_OP:
         fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1, 1));
-        lbl1 = _gen_label();
-        fprintf(output_file, "JE %s\nMOV %s, 0\n", lbl1, ret);
-        lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\nMOV %s, 1\n\n%s:\n", lbl2, lbl1, ret, lbl2);
-        free(lbl1);
-        free(lbl2);
+        lbl1 = _label_count();
+        fprintf(output_file, "JE L%d\nMOV %s, 0\n", lbl1, ret);
+        lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\nMOV %s, 1\n\nL%d:\n", lbl2, lbl1, ret, lbl2);
         break;
     case OR_OP:
         fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1, 1));
-        lbl1 = _gen_label();
-        fprintf(output_file, "JNE %s\nCMP %s, 0\nJNE %s\nMOV %s, 0\n", lbl1, _node(operation->right, 1, 1), lbl1, ret);
-        lbl2 = _gen_label();
-        fprintf(output_file, "JMP %s\n\n%s:\nMOV %s, 1\n\n%s:\n", lbl2, lbl1, ret, lbl2);
-        free(lbl1);
-        free(lbl2);
+        lbl1 = _label_count();
+        fprintf(output_file, "JNE L%d\nCMP %s, 0\nJNE L%d\nMOV %s, 0\n", lbl1, _node(operation->right, 1, 1), lbl1, ret);
+        lbl2 = _label_count();
+        fprintf(output_file, "JMP L%d\n\nL%d:\nMOV %s, 1\n\nL%d:\n", lbl2, lbl1, ret, lbl2);
         break;
     case SHL_OP:
         fprintf(output_file, "SHL %s, %s, %s\n", ret, _node(operation->left, 1, 1), _node(operation->right, 0, 1));

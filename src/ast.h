@@ -47,6 +47,7 @@ enum OPERATION
 enum NODE_TYPE
 {
     NODE_TYPE_IF,
+    NODE_TYPE_WHILE,
     NODE_TYPE_FUNC_DEF,
     NODE_TYPE_STATEMENTS,
     NODE_TYPE_OPERATION,
@@ -103,6 +104,7 @@ struct AST_Node *block_node(struct AST_Node *statement);
 struct AST_Node *function_node(struct SymbolTableEntry *identifier, struct AST_Node *parameters, struct AST_Node *statements);
 struct AST_Node *call_node(struct AST_Node *identifier, struct AST_Node *arguments);
 struct AST_Node *if_node(struct AST_Node *condition, struct AST_Node *then_branch, struct AST_Node *else_branch);
+struct AST_Node *while_node(struct AST_Node *condition, struct AST_Node *body);
 struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statement);
 void program_append(struct AST_Node *statement);
 

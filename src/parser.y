@@ -52,7 +52,7 @@
 
 %type <nodePointer>parameter parameter_list
 %type <stringValue>function_declaration parameterized_identifier
-%type <nodePointer>jump_statement selection_statement
+%type <nodePointer>jump_statement selection_statement iteration_statement
 
 %%
 
@@ -216,7 +216,7 @@ optional_expression     : expression
     /* A statement is one of a block, selection, iteration, jump, a semicolon optionally preceded by an expression, a try or a declaration followed by a semicolon. */
 statement               : { scope_down(); } block_statement  { scope_up(); $$ = $2; }
                         | selection_statement
-                        | iteration_statement               { $$ = NULL; }
+                        | iteration_statement
                         | jump_statement
                         | try_statement                     { $$ = NULL; }
                         | optional_expression SEMICOLON
@@ -250,10 +250,10 @@ switch_case             : CASE ternary_expression COLON block_item_list
                         ;
 
     /* Iteration statements are WHILEs and DO WHILES and FORs */
-iteration_statement     : WHILE LPAREN expression RPAREN statement
-                        | DO statement WHILE LPAREN expression RPAREN SEMICOLON
-                        | FOR LPAREN optional_expression SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement
-                        | FOR LPAREN declaration SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement
+iteration_statement     : WHILE LPAREN expression RPAREN statement                                  { $$ = while_node($3, $5); }
+                        | DO statement WHILE LPAREN expression RPAREN SEMICOLON                     { $$ = NULL; }
+                        | FOR LPAREN optional_expression SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement { $$ = NULL; }
+                        | FOR LPAREN declaration SEMICOLON optional_expression SEMICOLON optional_expression RPAREN statement { $$ = NULL; }
                         ;
 
     /* Jump statements are ones which affect control flow. */

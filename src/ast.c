@@ -109,6 +109,16 @@ struct AST_Node *if_node(struct AST_Node *condition, struct AST_Node *then_branc
     return node;
 }
 
+struct AST_Node *while_node(struct AST_Node *condition, struct AST_Node *body)
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_WHILE;
+    node->condition = condition;
+    node->then_branch = body;
+    node->else_branch = NULL;
+    return node;
+}
+
 struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statement)
 {
     assert(block->tag == NODE_TYPE_STATEMENTS);
@@ -147,6 +157,7 @@ void destroy_ast(struct AST_Node *root)
     switch (root->tag)
     {
     case NODE_TYPE_IF:
+    case NODE_TYPE_WHILE:
         destroy_ast(root->condition);
         destroy_ast(root->then_branch);
         destroy_ast(root->else_branch);
