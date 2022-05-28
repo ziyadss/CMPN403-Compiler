@@ -7,7 +7,6 @@
 
     int yylex();
     int yywrap() { return 1; }
-    extern int yylineno;
 %}
 
 %union
@@ -18,8 +17,7 @@
     char *stringValue;
     _Bool boolValue;
     struct AST_Node *nodePointer;
-    /* enum OPERATION operation; */
-    int operation;
+    int enumValue;
 }
 
     /* Keywords. */
@@ -47,7 +45,7 @@
 
 %type <nodePointer>literal
 
-%type <operation>unary_op assignment_op
+%type <enumValue>unary_op assignment_op type_modifier
 
 %type <nodePointer>initializer initializer_list function top_level_statement declaration
 %type <nodePointer>block_statement block_item_list statement 
@@ -59,13 +57,13 @@
 %%
 
     /* A program consists of a number of top level statements. */
-program                 : program top_level_statement                   { program_append($2); }
-                        | top_level_statement                           { program_append($1); }
+program                 : error SEMICOLON                           { yyerror("Error: \n"); }
+                        | program top_level_statement               { program_append($2); }
+                        | top_level_statement                       { program_append($1); }
                         ;
 
     /* Top level statements only declare or define functions and other language constructs (variables, enums, etc.). */
-top_level_statement     : error SEMICOLON                     { yyerror("Invalid top level statement at line %d\n", yylineno); yyerrok;}
-                        | declaration SEMICOLON
+top_level_statement     : declaration SEMICOLON
                         | function
                         ;
 
@@ -123,7 +121,7 @@ expression              : expression COMMA assign_expression            { $$ = o
                         ;
 
     /* An assignment expression is either an assignment expression or decays to a ternary expression. */
-assign_expression       : IDENTIFIER assignment_op assign_expression    { $$ = operation_node($2, identifier_node(lookup($1)), $3); }
+assign_expression       : IDENTIFIER assignment_op assign_expression    { struct SymbolTableEntry* symbol = lookup($1); if (symbol == NULL) YYERROR; else $$ = operation_node($2, identifier_node(symbol), $3); }
                         | ternary_expression
                         ;
 
@@ -294,18 +292,18 @@ type_modifier_list      : type_modifier_list type_modifier
                         ;
 
     /* A type modifier is a data type. */
-type_modifier           : BOOL
-                        | CHAR
-                        | DOUBLE
-                        | FLOAT
-                        | INT
-                        | LONG
-                        | SHORT
-                        | SIGNED
-                        | STRING
-                        | UNSIGNED
-                        | VOID
-                        | enum_type
+type_modifier           : BOOL                  { $$ = BOOL_TYPE; }
+                        | CHAR                  { $$ = CHAR_TYPE; }
+                        | DOUBLE                { $$ = DOUBLE_TYPE; }
+                        | FLOAT                 { $$ = FLOAT_TYPE; }
+                        | INT                   { $$ = INT_TYPE; }
+                        | LONG                  { $$ = LONG_TYPE; }
+                        | SHORT                 { $$ = SHORT_TYPE; }
+                        | SIGNED                { $$ = SIGNED_TYPE; }
+                        | STRING                { $$ = STRING_TYPE; }
+                        | UNSIGNED              { $$ = UNSIGNED_TYPE; }
+                        | VOID                  { $$ = VOID_TYPE; }
+                        | enum_type             { $$ = ENUM_TYPE; }
                         ;
 
     /* An enum type is ENUM followed by an identifier, or an (optionally anonymous) enum declaration. */

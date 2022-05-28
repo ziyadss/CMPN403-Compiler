@@ -36,7 +36,8 @@ struct SymbolTable
 enum SemanticError
 {
     NO_ERROR,
-    USED_IDENTIFIER
+    USED_IDENTIFIER,
+    UNDECLARED_IDENTIFIER
 };
 
 struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func);

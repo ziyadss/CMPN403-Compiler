@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -10,13 +11,20 @@ extern void scope_down();
 extern void quadruples();
 extern void destroy_global_table();
 extern void destroy_program();
+extern char *get_error_message();
 
-int yyerror(const char *format, ...)
+_Bool errored = 0;
+
+extern int yylineno;
+
+int yyerror(char *error)
 {
-    va_list args;
-    va_start(args, format);
-    vfprintf(stderr, format, args);
-    va_end(args);
+    char *message = get_error_message();
+    message = message == NULL ? error : message;
+    assert(message != NULL);
+    fprintf(stderr, "Error on line %d: %s\n", yylineno, message);
+
+    errored = 1;
     return 1;
 }
 
@@ -45,19 +53,22 @@ int main(int argc, char **argv)
 
     printf("Parsing complete.\n");
 
-    char *output_filename = "output.asm";
-    output_file = fopen(output_filename, "w");
-    if (output_file == NULL)
+    if (!errored)
     {
-        fprintf(stderr, "Error: Could not open file %s\n", output_filename);
-        return 1;
+        char *output_filename = "output.asm";
+        output_file = fopen(output_filename, "w");
+        if (output_file == NULL)
+        {
+            fprintf(stderr, "Error: Could not open file %s\n", output_filename);
+            return 1;
+        }
+
+        quadruples();
+
+        fclose(output_file);
+
+        printf("\nCode generation complete.\n");
     }
-
-    quadruples();
-
-    fclose(output_file);
-
-    printf("\nCode generation complete.\n");
 
     destroy_global_table();
     destroy_program();
