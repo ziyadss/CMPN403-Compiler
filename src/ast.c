@@ -5,7 +5,6 @@
 
 enum OPERATION
 {
-    TERNARY_OP,
     COMMA_OP,
     CALL_OP,
     ADD_ASSIGN_OP,

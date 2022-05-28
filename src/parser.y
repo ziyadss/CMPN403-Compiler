@@ -128,7 +128,7 @@ assign_expression       : IDENTIFIER assignment_op assign_expression    { $$ = o
                         ;
 
     /* An ternary expression is either a ternary expression or decays to a logical or expression. */
-ternary_expression      : or_expression QUESTION expression COLON ternary_expression    { printf("Unreachable\n"); }
+ternary_expression      : or_expression QUESTION expression COLON ternary_expression    { $$ = if_node($1, $3, $5); }
                         | or_expression
                         ;
 
