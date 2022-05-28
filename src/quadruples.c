@@ -318,6 +318,10 @@ char *_node(struct AST_Node *statement, _Bool left, _Bool ternary)
     case NODE_TYPE_DO_WHILE:
         _do_while(statement);
         break;
+    case NODE_TYPE_FOR:
+        _node(statement->initialization, 1, 0);
+        _while(statement);
+        break;
     case NODE_TYPE_STATEMENTS:
         _block(statement);
         break;

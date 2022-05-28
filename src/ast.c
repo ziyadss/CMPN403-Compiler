@@ -143,6 +143,16 @@ struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statemen
     return block;
 }
 
+struct AST_Node *for_node(struct AST_Node *initialization, struct AST_Node *condition, struct AST_Node *loop, struct AST_Node *body)
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_FOR;
+    node->condition = condition;
+    node->then_branch = add_statement(body->tag == NODE_TYPE_STATEMENTS ? body : block_node(body), loop);
+    node->initialization = initialization;
+    return node;
+}
+
 void create_program()
 {
     program = create_node();
@@ -172,6 +182,11 @@ void destroy_ast(struct AST_Node *root)
         destroy_ast(root->condition);
         destroy_ast(root->then_branch);
         destroy_ast(root->else_branch);
+        break;
+    case NODE_TYPE_FOR:
+        destroy_ast(root->condition);
+        destroy_ast(root->then_branch);
+        destroy_ast(root->initialization);
         break;
     case NODE_TYPE_FUNC_DEF:
     case NODE_TYPE_OPERATION:

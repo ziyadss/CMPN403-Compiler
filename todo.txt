@@ -4,7 +4,6 @@ generate ASM for
 comparison in non-cond expressions
 
 generate AST for - then ASM
-for and do while loops
 switch - bunch of ifs, handling a label to break to
 try-catch & stacktrace - current scope - lost in AST->ASM? found in refactored AST nodes?
 break/continue jumps to labels, one before one after
