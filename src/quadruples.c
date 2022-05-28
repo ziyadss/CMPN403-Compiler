@@ -8,6 +8,14 @@ FILE *output_file = NULL;
 char *_operation(struct AST_Node *operation, _Bool left);
 char *_block(struct AST_Node *block);
 
+char *_gen_label()
+{
+    static int label_count = 1;
+    char *label;
+    asprintf(&label, "L%d", label_count++);
+    return label;
+}
+
 char *_node(struct AST_Node *statement, _Bool left)
 {
     char *ret = NULL;
@@ -99,6 +107,7 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         fprintf(output_file, "ADD %s, %s, %s\n", identifier, identifier, _node(operation->right, 1));
         break;
     case AND_ASSIGN_OP:
+        fprintf(output_file, "AND %s, %s, %s\n", identifier, identifier, _node(operation->right, 1));
         break;
     case ASSIGN_OP:
         fprintf(output_file, "MOV %s, %s\n", operation->left->identifier, _node(operation->right, 1));
@@ -113,6 +122,7 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         fprintf(output_file, "MUL %s, %s, %s\n", identifier, identifier, _node(operation->right, 1));
         break;
     case OR_ASSIGN_OP:
+        fprintf(output_file, "OR %s, %s, %s\n", identifier, identifier, _node(operation->right, 1));
         break;
     case SHL_ASSIGN_OP:
         fprintf(output_file, "SHL %s, %s, %s\n", identifier, identifier, _node(operation->right, 1));
@@ -130,6 +140,13 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         fprintf(output_file, "ADD %s, %s, %s\n", identifier, _node(operation->left, 1), _node(operation->right, 0));
         break;
     case AND_OP:
+        fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1));
+        char *lbl1 = _gen_label();
+        fprintf(output_file, "JE %s\nCMP %s, 0\nJE %s\nMOV %s, 1\n", lbl1, _node(operation->right, 1), lbl1, identifier);
+        char *lbl2 = _gen_label();
+        fprintf(output_file, "JMP %s\n%s:\nMOV %s, 0\n%s:\n", lbl2, lbl1, identifier, lbl2);
+        free(lbl1);
+        free(lbl2);
         break;
     case BIT_AND_OP:
         fprintf(output_file, "AND %s, %s, %s\n", identifier, _node(operation->left, 1), _node(operation->right, 0));
@@ -203,8 +220,12 @@ char *_operation(struct AST_Node *operation, _Bool left)
         fprintf(output_file, "CALL %s\n", operation->left->identifier);
         break;
     case ADD_ASSIGN_OP:
+        fprintf(output_file, "ADD %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case AND_ASSIGN_OP:
+        fprintf(output_file, "AND %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case ASSIGN_OP:
         if (operation->right->tag == NODE_TYPE_OPERATION)
@@ -214,25 +235,48 @@ char *_operation(struct AST_Node *operation, _Bool left)
         ret = operation->left->identifier;
         break;
     case DIV_ASSIGN_OP:
+        fprintf(output_file, "DIV %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case MOD_ASSIGN_OP:
+        fprintf(output_file, "MOD %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case MUL_ASSIGN_OP:
+        fprintf(output_file, "MUL %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case OR_ASSIGN_OP:
+        fprintf(output_file, "OR %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case SHL_ASSIGN_OP:
+        fprintf(output_file, "SHL %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case SHR_ASSIGN_OP:
+        fprintf(output_file, "SHR %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case SUB_ASSIGN_OP:
+        fprintf(output_file, "SUB %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case XOR_ASSIGN_OP:
+        fprintf(output_file, "XOR %s, %s, %s\n", operation->left->identifier, operation->left->identifier, _node(operation->right, 1));
+        ret = operation->left->identifier;
         break;
     case ADD_OP:
         fprintf(output_file, "ADD %s, %s, %s\n", ret, _node(operation->left, 1), _node(operation->right, 0));
         break;
     case AND_OP:
+        fprintf(output_file, "CMP %s, 0\n", _node(operation->left, 1));
+        char *lbl1 = _gen_label();
+        fprintf(output_file, "JE %s\nCMP %s, 0\nJE %s\nMOV %s, 1\n", lbl1, _node(operation->right, 1), lbl1, ret);
+        char *lbl2 = _gen_label();
+        fprintf(output_file, "JMP %s\n, %s:\nMOV %s, 0\n%s:\n", lbl2, lbl1, ret, lbl2);
+        free(lbl1);
+        free(lbl2);
         break;
     case BIT_AND_OP:
         fprintf(output_file, "AND %s, %s, %s\n", ret, _node(operation->left, 1), _node(operation->right, 0));
