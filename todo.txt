@@ -1,0 +1,28 @@
+IDENTIFIER inserted check @
+line 127
+line 202
+line 207
+
+3 operation functions -> to 1 or 2
+
+generate ASM for
+comparison in non-cond expressions
+
+generate AST for - then ASM
+iteration
+switch - bunch of ifs, handling a label to break to
+try-catch & stacktrace - current scope - lost in AST->ASM? found in refactored AST nodes?
+break/continue jumps to labels, one before one after
+
+symbol table
+	check if var exists / right access
+	return errors decently
+	further semantic checks?
+
+gui
+
+enums
+
+type conversion quadruples
+	needs AST Identifiers to become STE* instead of char*, on generation, if valid cast exists output cast quadruple, else return semantic error of invalid operands
+	
