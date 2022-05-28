@@ -408,7 +408,7 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         break;
     case ADD_OP:
         if (operation->left == NULL)
-            fprintf(output_file, "MOVE %s, %s\n", identifier, _node(operation->right, 1, 1));
+            fprintf(output_file, "MOV %s, %s\n", identifier, _node(operation->right, 1, 1));
         else
             fprintf(output_file, "ADD %s, %s, %s\n", identifier, _node(operation->left, 1, 1), _node(operation->right, 0, 1));
         break;
@@ -433,12 +433,12 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         {
             assert(operation->right->tag == NODE_TYPE_IDENTIFIER);
             fprintf(output_file, "DEC %s\n", operation->right->identifier->name);
-            fprintf(output_file, "MOVE %s, %s\n", identifier, operation->right->identifier->name);
+            fprintf(output_file, "MOV %s, %s\n", identifier, operation->right->identifier->name);
         }
         else
         {
             assert(operation->left->tag == NODE_TYPE_IDENTIFIER);
-            fprintf(output_file, "MOVE %s, %s\n", identifier, operation->left->identifier->name);
+            fprintf(output_file, "MOV %s, %s\n", identifier, operation->left->identifier->name);
             fprintf(output_file, "DEC %s\n", operation->left->identifier->name);
         }
         break;
@@ -456,12 +456,12 @@ void _operation_dst(char *identifier, struct AST_Node *operation)
         {
             assert(operation->right->tag == NODE_TYPE_IDENTIFIER);
             fprintf(output_file, "INC %s\n", operation->right->identifier->name);
-            fprintf(output_file, "MOVE %s, %s\n", identifier, operation->right->identifier->name);
+            fprintf(output_file, "MOV %s, %s\n", identifier, operation->right->identifier->name);
         }
         else
         {
             assert(operation->left->tag == NODE_TYPE_IDENTIFIER);
-            fprintf(output_file, "MOVE %s, %s\n", identifier, operation->left->identifier->name);
+            fprintf(output_file, "MOV %s, %s\n", identifier, operation->left->identifier->name);
             fprintf(output_file, "INC %s\n", operation->left->identifier->name);
         }
         break;
@@ -616,7 +616,9 @@ char *_operation(struct AST_Node *operation, _Bool left)
     case GT_OP:
         break;
     case INC_OP:
-        fprintf(output_file, "ADD %s, %s, 1\n", ret, _node(operation->left, 1, 1));
+        assert(operation->left->tag == NODE_TYPE_IDENTIFIER);
+        ret = operation->left->identifier->name;
+        fprintf(output_file, "INC %s\n", ret);
         break;
     case LE_OP:
         break;
