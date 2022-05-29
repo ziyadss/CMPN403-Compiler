@@ -10,11 +10,6 @@ try-catch & stacktrace - current scope - lost in AST->ASM? found in refactored A
 
 enums
 
-symbol table
-	check if var exists / right access
-	return errors decently
-	further semantic checks?
-
 type conversion quadruples
 	on generation, if valid cast exists output cast quadruple, else return semantic error of invalid operands
 
@@ -24,5 +19,3 @@ comparison in non-cond expressions
 
 notes:
 in insert, lookup func, check if defined but not decl then allow else deny
-valid_type
-
