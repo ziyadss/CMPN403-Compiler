@@ -184,14 +184,13 @@ struct AST_Node *continue_node()
     return node;
 }
 
-// try-catch-finally
 struct AST_Node *try_node(struct AST_Node *try_block, struct AST_Node *catch_block, struct AST_Node *finally_block)
 {
     struct AST_Node *node = create_node();
     node->tag = NODE_TYPE_TRY;
-    node->left = try_block;
-    node->right = catch_block;
-    node->else_branch = finally_block;
+    node->try_block = try_block;
+    node->catch_block = catch_block;
+    node->finally_block = finally_block;
     return node;
 }
 

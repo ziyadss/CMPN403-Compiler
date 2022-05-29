@@ -336,17 +336,18 @@ void _try(struct AST_Node *statement)
     int lblcatch = _label_count();
     int lblfinally = _label_count();
 
-    fprintf(output_file, "PUSH \"L%d\"\n", lblcatch);
-    
+    fprintf(output_file, "PUSHL L%d\n", lblcatch);
     _node(statement->try_block, 1, 0, 0, 0);
-    fprintf(output_file, "JMP L%d\n", lblfinally);
+    fprintf(output_file, "JMP L%d\n\n", lblfinally);
 
     fprintf(output_file, "L%d:\n", lblcatch);
     _node(statement->catch_block, 1, 0, 0, 0);
-    fprintf(output_file, "JMP L%d\n", lblfinally);
+    if (lblfinally)
+        fprintf(output_file, "JMP L%d\n\n", lblfinally);
 
     fprintf(output_file, "L%d:\n", lblfinally);
-    _node(statement->finally_block, 1, 0, 0, 0);
+    if (statement->finally_block != NULL)
+        _node(statement->finally_block, 1, 0, 0, 0);
 }
 
 char *_node(struct AST_Node *statement, _Bool left, _Bool ternary, int label, int label_cont)
@@ -588,8 +589,7 @@ char *_operation(struct AST_Node *operation, _Bool left)
         break;
     case THROW_OP:
         ret = "throwval";
-        fprintf(output_file, "MOV %s, %s\n", ret, _node(operation->left, 1, 1, 0, 0));
-        fprintf(output_file, "POP retadr\nRET\n");
+        fprintf(output_file, "MOV %s, %s\nRET\n", ret, _node(operation->left, 1, 1, 0, 0));
         break;
     case COMMA_OP:
         _node(operation->left, 1, 0, 0, 0);
