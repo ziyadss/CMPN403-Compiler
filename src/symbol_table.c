@@ -203,7 +203,7 @@ struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE
 
 enum TYPE *insert_into_array(enum TYPE *arr, enum TYPE type)
 {
-    printf("insert_into_array\n");
+    //printf("insert_into_array\n");
     arrput(arr, type);
     return arr;
 }
