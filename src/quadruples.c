@@ -333,15 +333,21 @@ void _do_while(struct AST_Node *statement)
 
 void _try(struct AST_Node *statement)
 {
+    // generate code for try block, then jump to catch block if exception is thrown, always jump to finally block
     int lbl1 = _label_count();
     int lbl2 = _label_count();
     int lbl3 = _label_count();
     int lbl4 = _label_count();
+    int lbl5 = _label_count();
     fprintf(output_file, "L%d:\n", lbl1);
-    _node(statement->then_branch, 1, 0, lbl2, lbl3);
-    fprintf(output_file, "JMP L%d\n\nL%d:\n", lbl4, lbl2);
-    _node(statement->else_branch, 1, 0, lbl4, lbl3);
+    _node(statement->try_block, 1, 0, lbl3, lbl2);
+    fprintf(output_file, "\nL%d:\n", lbl2);
+    fprintf(output_file, "JMP L%d\n\nL%d:\n", lbl4, lbl3);
+    _node(statement->catch_block, 1, 0, lbl5, lbl4);
     fprintf(output_file, "\nL%d:\n", lbl4);
+    fprintf(output_file, "JMP L%d\n\nL%d:\n", lbl5, lbl2);
+    _node(statement->finally_block, 1, 0, lbl1, lbl5);
+    fprintf(output_file, "\nL%d:\n", lbl5);
 }
 
 char *_node(struct AST_Node *statement, _Bool left, _Bool ternary, int label, int label_cont)
@@ -582,13 +588,9 @@ char *_operation(struct AST_Node *operation, _Bool left)
         fprintf(output_file, "PUSH retadr\nRET\n");
         break;
     case THROW_OP:
-        if (operation->left != NULL)
-        {
-            if (operation->left->tag == NODE_TYPE_OPERATION)
-                _operation_dst(ret, operation->left);
-            else
-                fprintf(output_file, "MOV %s, %s\n", ret, _node(operation->left, 1, 1, 0, 0));
-        }
+        ret = "throwval";
+        fprintf(output_file, "MOV %s, %s\n", ret, _node(operation->left, 1, 1, 0, 0));
+        break;
     case COMMA_OP:
         _node(operation->left, 1, 0, 0, 0);
         _node(operation->right, 0, 0, 0, 0);
