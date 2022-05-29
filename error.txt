@@ -1,3 +1,0 @@
-Error on line 3: syntax error
-Error on line 3: Invalid statement
-Error on line 7: Identifier not declared

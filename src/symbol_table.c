@@ -104,12 +104,12 @@ struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init)
     // if found == NULL OR checks fail, return NULL;
     if (found == NULL)
         semantic_error = UNDECLARED_IDENTIFIER;
-    else if (found->is_init == 0 && init == 0 && found->is_param == 0)
-        semantic_error = UNINITIALIZED_IDENTIFIER;
     else if (found->is_func == 0 && func == 1)
         semantic_error = NOT_A_FUNCTION;
     else if (found->is_func == 1 && func == 0)
         semantic_error = IS_A_FUNCTION;
+    else if (found->is_init == 0 && init == 0 && found->is_param == 0)
+        semantic_error = UNINITIALIZED_IDENTIFIER;
     else
         return found;
 
@@ -222,7 +222,6 @@ struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE
     if (verify_type(types) == 0)
     {
         semantic_error = INVALID_TYPE;
-        printf("Invalid type modifier combination\n");
         return NULL;
     }
 

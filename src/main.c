@@ -53,7 +53,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    char *error_filename_st = "error.txt";
+    char *error_filename_st = "errors.txt";
     error_file = fopen(error_filename_st, "w");
     if (error_file == NULL)
     {

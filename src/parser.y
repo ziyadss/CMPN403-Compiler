@@ -78,7 +78,7 @@ top_level_statement     : declaration SEMICOLON
                         ;
 
     /* A declaration consists of a type, and optionally initializers. */
-declaration             : type_modifier_list initializer_list       { $$ = $1.nodePointer == NULL ? change_list_params($2, $1.enumPointer, 0) : operation_node(COMMA_OP, $1.nodePointer, change_list_params($2, $1.enumPointer, 0)); }
+declaration             : type_modifier_list initializer_list       { struct AST_Node *identifiers = change_list_params($2, $1.enumPointer, 0); if (identifiers==NULL) YYERROR; else $$ = $1.nodePointer == NULL ? identifiers : operation_node(COMMA_OP, $1.nodePointer, identifiers); }
                         | type_modifier_list                        { $$ = $1.nodePointer; }
                         ;
 
@@ -88,16 +88,16 @@ initializer_list        : initializer_list COMMA initializer        { $$ = opera
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0, 0)), $3); }
-                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0, 0)); }
+initializer             : IDENTIFIER ASSIGN assign_expression       { struct SymbolTableEntry* symbol = insert($1, 0, 1, 0, 0); if (symbol==NULL) YYERROR; else $$ = operation_node(ASSIGN_OP, identifier_node(symbol), $3); }
+                        | IDENTIFIER                                { struct SymbolTableEntry* symbol = insert($1, 0, 0, 0, 0); if (symbol==NULL) YYERROR; else $$ = identifier_node(symbol); }
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
 
-parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { $$ = insert($2, 1, 1, 1, 0); scope_down();  }
+parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { struct SymbolTableEntry* symbol = insert($2, 1, 1, 1, 0); if (symbol == NULL) YYERROR; else $$ = symbol; scope_down();  }
                         ;
 
-function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = insert($2, 1, 1, 1, 0); }
+function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { struct SymbolTableEntry* symbol = insert($2, 1, 1, 1, 0); if (symbol == NULL) YYERROR; else $$ = symbol; }
                         ;
 
 function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); $$ = function_node($1, $2, $4); }
@@ -112,7 +112,7 @@ parameter_list          : parameter_list COMMA parameter                        
                         ;
 
     /* A parameter is a type, and an optional initializer. */
-parameter               : type_modifier_list initializer                                    { $$ = change_list_params($2, $1.enumPointer, 1); }
+parameter               : type_modifier_list initializer                                    { struct AST_Node *identifiers = change_list_params($2, $1.enumPointer, 1); if (identifiers==NULL) YYERROR; else $$ = identifiers;}
                         | type_modifier_list                                                { $$ = NULL; }
                         ;
 
@@ -316,9 +316,9 @@ type_modifier           : BOOL                  { $$ = BOOL_TYPE; }
                         ;
 
     /* An enum type is ENUM followed by an identifier, or an (optionally anonymous) enum declaration. */
-enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE    { insert($2, 1, 1, 0, 0); $$ = $4; }
+enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE    { struct SymbolTableEntry* symbol = insert($2, 1, 1, 0, 0); if (symbol==NULL) YYERROR; else $$ = $4; }
                         | ENUM LBRACE initializer_list RBRACE               { $$ = $3; }
-                        | ENUM IDENTIFIER                                   { insert($2, 1, 0, 0, 0); $$ = NULL; }
+                        | ENUM IDENTIFIER                                   { struct SymbolTableEntry* symbol = insert($2, 1, 0, 0, 0); if (symbol==NULL) YYERROR; else $$ = NULL; }
                         ;
 
     /* Unary operators. */
