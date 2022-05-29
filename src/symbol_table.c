@@ -4,6 +4,8 @@
 #include "stb_ds.h"
 
 extern int yyerror(const char *format, ...);
+extern int yylineno;
+extern FILE *error_file;
 
 struct SymbolTable *current_scope = NULL;
 enum SEMANTIC_ERROR semantic_error = NO_ERROR;
@@ -100,9 +102,7 @@ void scope_up()
         {
             struct SymbolTableEntry *next = head->next;
             if (!(head->is_used))
-            {
-                printf("WARNING: Unused identifier '%s'\n", head->name);
-            }
+                fprintf(error_file, "Warning on line %d: Identifier '%s' declared but not used\n", yylineno, head->name);
             head = next;
         }
     }
