@@ -14,6 +14,7 @@
 
 enum TYPE
 {
+    INVALID = -1,
     BOOL_TYPE,
     CHAR_TYPE,
     DOUBLE_TYPE,
@@ -38,6 +39,8 @@ struct SymbolTableEntry
     _Bool is_func;
     _Bool is_param;
     _Bool is_const;
+
+    enum TYPE main_type;
 
     struct SymbolTableEntry *next;
 };
