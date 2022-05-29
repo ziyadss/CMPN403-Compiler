@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ast.h"
+#include "helpers.h"
+#include "prints.h"
+
 #define ST_ARRAY_SIZE 1
 #define HASH_SEED 0
 
@@ -21,16 +25,18 @@ enum TYPE
     STRING_TYPE,
     UNSIGNED_TYPE,
     VOID_TYPE,
-    ENUM_TYPE
+    ENUM_TYPE,
+    CONST_TYPE
 };
 
 struct SymbolTableEntry
 {
     char *name;
-    enum TYPE *TYPES;
+    enum TYPE *types;
     _Bool is_init;
     _Bool is_used;
     _Bool is_func;
+    _Bool is_param;
     _Bool is_const;
 
     struct SymbolTableEntry *next;
@@ -50,12 +56,16 @@ enum SEMANTIC_ERROR
     UNDECLARED_IDENTIFIER,
     UNINITIALIZED_IDENTIFIER,
     NOT_A_FUNCTION,
-    IS_A_FUNCTION
+    IS_A_FUNCTION,
+    INVALID_TYPE
 };
 
-struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func);
+struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func, _Bool is_param);
 void scope_down();
 void scope_up();
 struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init);
+
+struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE *types);
+enum TYPE *insert_into_array(enum TYPE *arr, enum TYPE type);
 
 #endif // SYMBOL_TABLE_H

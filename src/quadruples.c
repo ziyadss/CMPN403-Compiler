@@ -717,7 +717,7 @@ void quadruples()
         case NODE_TYPE_FUNC_DEF:
             if (node->right != NULL)
             {
-                fprintf(output_file, "%s: \nPOP retadr\n", node->identifier->name);
+                fprintf(output_file, "%s:\nPOP retadr\n", node->identifier->name);
                 _parameters_pop(node->left);
                 char *end = _block(node->right, 0, 0);
                 if (end == NULL || strcmp(end, "retval") != 0)
@@ -725,7 +725,10 @@ void quadruples()
             }
             break;
         default:
-            fprintf(stderr, "Invalid top level statement: %d\n", node->tag);
+            if (node->tag == NODE_TYPE_OPERATION && node->op == COMMA_OP)
+                _operation(node, 1);
+            else
+                fprintf(stderr, "Invalid top level statement: %d, operation %d\n", node->tag, node->op);
             break;
         }
         fprintf(output_file, "\n");
