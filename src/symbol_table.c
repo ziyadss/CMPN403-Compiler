@@ -91,7 +91,7 @@ void scope_down()
 
 void scope_up()
 {
-    print_table(0);
+    // print_table(0);
     struct SymbolTable *old_scope = current_scope;
     current_scope = old_scope->parent;
     // destroy_table(old_scope);
@@ -203,7 +203,6 @@ struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE
 
 enum TYPE *insert_into_array(enum TYPE *arr, enum TYPE type)
 {
-    printf("insert_into_array\n");
     arrput(arr, type);
     return arr;
 }
