@@ -97,7 +97,7 @@ void scope_up()
     // destroy_table(old_scope);
 }
 
-struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init)
+struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool need_init, _Bool init)
 {
     struct SymbolTableEntry *found = search_tables(current_scope, identifier);
     // run checks, as parameters to lookup (const, init, func)
@@ -110,10 +110,16 @@ struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init)
         semantic_error = IS_A_FUNCTION;
     else if (found->is_init == 0 && func == 1)
         semantic_error = UNDEFINED_FUNCTION;
-    else if (found->is_init == 0 && init == 0 && found->is_param == 0)
+    else if (found->is_init == 0 && need_init == 0 && found->is_param == 0)
         semantic_error = UNINITIALIZED_IDENTIFIER;
     else
+    {
+        // printf("lookup: %s\n, need init: %d, init: %d, is_init: %d\n", identifier, need_init, init, found->is_init);
+        found->is_used = 1;
+        found->is_init |= init;
+        // printf("lookup: %s\n, need init: %d, init: %d, is_init: %d\n", identifier, need_init, init, found->is_init);
         return found;
+    }
 
     return NULL;
 }

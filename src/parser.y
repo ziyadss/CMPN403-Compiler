@@ -131,7 +131,7 @@ expression              : expression COMMA assign_expression            { $$ = o
                         ;
 
     /* An assignment expression is either an assignment expression or decays to a ternary expression. */
-assign_expression       : IDENTIFIER assignment_op assign_expression    { struct SymbolTableEntry* symbol = lookup($1, 0, $2==ASSIGN_OP); if (symbol == NULL) YYERROR; else $$ = operation_node($2, identifier_node(symbol), $3); }
+assign_expression       : IDENTIFIER assignment_op assign_expression    { struct SymbolTableEntry* symbol = lookup($1, 0, $2!=ASSIGN_OP, $2==ASSIGN_OP); if (symbol == NULL) YYERROR; else $$ = operation_node($2, identifier_node(symbol), $3); }
                         | ternary_expression
                         ;
 
@@ -206,12 +206,12 @@ prefix_expression       : unary_op prefix_expression                    { $$ = o
     /* A postfix expression is either a postfix expression (including a function call) or decays to a base expression. */
 postfix_expression      : postfix_expression INC                        { $$ = operation_node(INC_OP, $1, NULL); }
                         | postfix_expression DEC                        { $$ = operation_node(DEC_OP, $1, NULL); }
-                        | IDENTIFIER LPAREN optional_expression RPAREN  { struct SymbolTableEntry* symbol = lookup($1, 1, 0); if (symbol == NULL) YYERROR; else $$ = call_node(identifier_node(symbol), $3); }
+                        | IDENTIFIER LPAREN optional_expression RPAREN  { struct SymbolTableEntry* symbol = lookup($1, 1, 1, 0); if (symbol == NULL) YYERROR; else $$ = call_node(identifier_node(symbol), $3); }
                         | base_expression
                         ;
 
     /* A base expression is either an identifier, a literal, or a parenthesized optional expression. */
-base_expression         : IDENTIFIER                                    { struct SymbolTableEntry* symbol = lookup($1, 0, 0); if (symbol == NULL) YYERROR; else $$ = identifier_node(symbol); }
+base_expression         : IDENTIFIER                                    { struct SymbolTableEntry* symbol = lookup($1, 0, 1, 0); if (symbol == NULL) YYERROR; else $$ = identifier_node(symbol); }
                         | literal
                         | LPAREN optional_expression RPAREN             { $$ = $2; }
                         ;
@@ -318,7 +318,7 @@ type_modifier           : BOOL                  { $$ = BOOL_TYPE; }
     /* An enum type is ENUM followed by an identifier, or an (optionally anonymous) enum declaration. */
 enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE    { struct SymbolTableEntry* symbol = insert($2, 1, 1, 0, 0); if (symbol==NULL) YYERROR; else $$ = $4; }
                         | ENUM LBRACE initializer_list RBRACE               { $$ = $3; }
-                        | ENUM IDENTIFIER                                   { struct SymbolTableEntry* symbol = insert($2, 1, 0, 0, 0); if (symbol==NULL) YYERROR; else $$ = NULL; }
+                        | ENUM IDENTIFIER                                   { struct SymbolTableEntry* symbol = lookup($2, 0, 1, 0); if (symbol==NULL) YYERROR; else $$ = NULL; }
                         ;
 
     /* Unary operators. */
