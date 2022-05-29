@@ -132,6 +132,8 @@ char *get_error_message()
         return "Identifier is not a function";
     case IS_A_FUNCTION:
         return "Identifier is a function";
+    case INVALID_TYPE:
+        return "Invalid type modifier combination";
     default:
         return "Unknown error";
     }

@@ -49,7 +49,7 @@
 
 %type <enumValue>unary_op assignment_op type_modifier
 
-%type <nodePointer>initializer function top_level_statement declaration initializer_list
+%type <nodePointer>initializer initializer_list function top_level_statement declaration
 %type <nodePointer>block_statement block_item_list statement
 
 %type <nodePointer>parameter parameter_list
@@ -83,8 +83,8 @@ initializer_list        : initializer_list COMMA initializer        { $$ = opera
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0, 0)), $3);printf("hereee\n"); }
-                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0, 0)) ;printf("hereee\n");}
+initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0, 0)), $3); }
+                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0, 0)); }
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
