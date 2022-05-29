@@ -99,8 +99,8 @@ class Ui_MainWindow(object):
         print("compileButtonAction")
         if(exists("output.asm")):
             remove("output.asm")
-        if(exists("error.txt")):
-            remove("error.txt")
+        if(exists("errors.txt")):
+            remove("errors.txt")
         if(exists("symbol_table.txt")):
             remove("symbol_table.txt")
         if(not exists(compilerRunLocation)) :
@@ -127,8 +127,8 @@ class Ui_MainWindow(object):
     def outputErrors(self):
         print("outputErrors")
         outErr = ""
-        if(exists("error.txt")):
-            outErr = open("error.txt").read()
+        if(exists("errors.txt")):
+            outErr = open("errors.txt").read()
         self.textBrowser_4.setPlainText(outErr)
         #self.textBrowser_4.setPlainText("Errors and Warnings")
 
