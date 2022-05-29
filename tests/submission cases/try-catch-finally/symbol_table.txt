@@ -1,0 +1,41 @@
+
+Parent: b
+Parent: Global Scope
+
+
+Parent: ab
+Parent: Global Scope
+
+
+Parent: 
+Parent: dab
+Parent: Global Scope
+
+
+Parent: 
+Parent: dab
+Parent: Global Scope
+
+z4, 
+Parent: 
+Parent: dab
+Parent: Global Scope
+
+
+Parent: dab
+Parent: Global Scope
+
+x4, 
+Parent: 
+Parent: maindab
+Parent: Global Scope
+
+y4, 
+Parent: 
+Parent: maindab
+Parent: Global Scope
+
+
+Parent: maindab
+Parent: Global Scope
+

@@ -9,6 +9,7 @@
 enum OPERATION
 {
     RET_OP,
+    THROW_OP,
     COMMA_OP,
     CALL_OP,
     ADD_ASSIGN_OP,
@@ -55,6 +56,7 @@ enum NODE_TYPE
     NODE_TYPE_FOR,
     NODE_TYPE_BREAK,
     NODE_TYPE_CONTINUE,
+    NODE_TYPE_TRY,
     NODE_TYPE_FUNC_DEF,
     NODE_TYPE_STATEMENTS,
     NODE_TYPE_OPERATION,
@@ -85,6 +87,13 @@ struct AST_Node
         {
             unsigned int statements_count, statements_capacity;
             struct AST_Node **statements;
+        };
+
+        struct
+        {
+            struct AST_Node *try_block;
+            struct AST_Node *catch_block;
+            struct AST_Node *finally_block;
         };
 
         struct
@@ -120,6 +129,7 @@ struct AST_Node *while_node(struct AST_Node *condition, struct AST_Node *body);
 struct AST_Node *do_while_node(struct AST_Node *condition, struct AST_Node *body);
 struct AST_Node *add_statement(struct AST_Node *block, struct AST_Node *statement);
 struct AST_Node *for_node(struct AST_Node *initialization, struct AST_Node *condition, struct AST_Node *loop, struct AST_Node *body);
+struct AST_Node *try_node(struct AST_Node *try_block, struct AST_Node *catch_block, struct AST_Node *finally_block);
 struct AST_Node *break_node();
 struct AST_Node *continue_node();
 void program_append(struct AST_Node *statement);
