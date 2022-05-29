@@ -1,22 +1,28 @@
+refactoring, low priority:
 3 operation functions -> to 1 or 2
 
-generate ASM for
-comparison in non-cond expressions
 
-generate AST for - then ASM
-switch - bunch of ifs, handling a label to break to
+
+
+requirements, ordered by priority:
+AST and ASM for
 try-catch & stacktrace - current scope - lost in AST->ASM? found in refactored AST nodes?
-break/continue jumps to labels, one before one after
+
+enums
 
 symbol table
 	check if var exists / right access
 	return errors decently
 	further semantic checks?
 
-gui
-
-enums
-
 type conversion quadruples
 	on generation, if valid cast exists output cast quadruple, else return semantic error of invalid operands
-	
+
+ASM for
+comparison in non-cond expressions
+
+
+notes:
+in insert, lookup func, check if defined but not decl then allow else deny
+valid_type
+
