@@ -104,12 +104,12 @@ struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init)
     // if found == NULL OR checks fail, return NULL;
     if (found == NULL)
         semantic_error = UNDECLARED_IDENTIFIER;
-    // else if (found->is_init == 0 && init == 0)
-    //     semantic_error = UNINITIALIZED_IDENTIFIER;
-    // else if (found->is_func == 0 && func == 1)
-    //     semantic_error = NOT_A_FUNCTION;
-    // else if (found->is_func == 1 && func == 0)
-    //     semantic_error = IS_A_FUNCTION;
+    else if (found->is_init == 0 && init == 0 && found->is_param == 0)
+        semantic_error = UNINITIALIZED_IDENTIFIER;
+    else if (found->is_func == 0 && func == 1)
+        semantic_error = NOT_A_FUNCTION;
+    else if (found->is_func == 1 && func == 0)
+        semantic_error = IS_A_FUNCTION;
     else
         return found;
 
@@ -209,13 +209,15 @@ _Bool verify_type(enum TYPE *types)
     return 0;
 }
 
-void change_parameters(struct SymbolTableEntry *entry, enum TYPE *types, _Bool func, _Bool init)
+void change_parameters(struct SymbolTableEntry *entry, enum TYPE *types, _Bool func, _Bool init, _Bool param)
 {
     entry->types = types;
     entry->is_init = init;
+    entry->is_param = param;
+    (void *)func;
 }
 
-struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE *types)
+struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE *types, _Bool param)
 {
     if (verify_type(types) == 0)
     {
@@ -231,13 +233,13 @@ struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE
         switch (node->tag)
         {
         case NODE_TYPE_IDENTIFIER:
-            change_parameters(node->identifier, types, 0, 0);
+            change_parameters(node->identifier, types, 0, 0, param);
             return initializer_list;
         case NODE_TYPE_OPERATION:
             if (node->op == ASSIGN_OP)
             {
                 assert(node->left->tag == NODE_TYPE_IDENTIFIER);
-                change_parameters(node->left->identifier, types, 0, 1);
+                change_parameters(node->left->identifier, types, 0, 1, param);
                 return initializer_list;
             }
             else if (node->op == COMMA_OP)
@@ -246,12 +248,12 @@ struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE
                 {
                     assert(node->right->op == ASSIGN_OP);
                     assert(node->right->left->tag == NODE_TYPE_IDENTIFIER);
-                    change_parameters(node->right->left->identifier, types, 0, 1);
+                    change_parameters(node->right->left->identifier, types, 0, 1, param);
                 }
                 else
                 {
                     assert(node->right->tag == NODE_TYPE_IDENTIFIER);
-                    change_parameters(node->right->identifier, types, 0, 0);
+                    change_parameters(node->right->identifier, types, 0, 0, param);
                 }
                 node = node->left;
             }

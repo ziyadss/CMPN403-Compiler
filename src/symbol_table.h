@@ -65,7 +65,7 @@ void scope_down();
 void scope_up();
 struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init);
 
-struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE *types);
+struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE *types, _Bool param);
 enum TYPE *insert_into_array(enum TYPE *arr, enum TYPE type);
 
 #endif // SYMBOL_TABLE_H

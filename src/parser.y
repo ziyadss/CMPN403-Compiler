@@ -67,9 +67,9 @@
 %%
 
     /* A program consists of a number of top level statements. */
-program                 : error SEMICOLON                           { yyerror("Error: \n"); }
-                        | program top_level_statement               { program_append($2); }
+program                 : program top_level_statement               { program_append($2); }
                         | top_level_statement                       { program_append($1); }
+                        | error SEMICOLON                           { yyerror("Invalid top level statement."); }
                         ;
 
     /* Top level statements only declare or define functions and other language constructs (variables, enums, etc.). */
@@ -78,7 +78,7 @@ top_level_statement     : declaration SEMICOLON
                         ;
 
     /* A declaration consists of a type, and optionally initializers. */
-declaration             : type_modifier_list initializer_list       { $$ = $1.nodePointer == NULL ? change_list_params($2, $1.enumPointer) : operation_node(COMMA_OP, $1.nodePointer, change_list_params($2, $1.enumPointer)); }
+declaration             : type_modifier_list initializer_list       { $$ = $1.nodePointer == NULL ? change_list_params($2, $1.enumPointer, 0) : operation_node(COMMA_OP, $1.nodePointer, change_list_params($2, $1.enumPointer, 0)); }
                         | type_modifier_list                        { $$ = $1.nodePointer; }
                         ;
 
@@ -112,7 +112,7 @@ parameter_list          : parameter_list COMMA parameter                        
                         ;
 
     /* A parameter is a type, and an optional initializer. */
-parameter               : type_modifier_list initializer                                    { $$ = $2; }
+parameter               : type_modifier_list initializer                                    { $$ = change_list_params($2, $1.enumPointer, 1); }
                         | type_modifier_list                                                { $$ = NULL; }
                         ;
 
@@ -231,6 +231,7 @@ statement               : { scope_down(); } block_statement { scope_up(); $$ = $
                         | try_statement                     { $$ = NULL; }
                         | optional_expression SEMICOLON
                         | declaration SEMICOLON
+                        | error SEMICOLON                   { $$ = NULL; yyerror("Invalid statement"); }
                         ;
 
     /* A block statement is a brace-enclosed list of optional block items. */
@@ -315,9 +316,9 @@ type_modifier           : BOOL                  { $$ = BOOL_TYPE; }
                         ;
 
     /* An enum type is ENUM followed by an identifier, or an (optionally anonymous) enum declaration. */
-enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE    { insert($1, 1, 1, 0, 0); $$ = $4; }
+enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE    { insert($2, 1, 1, 0, 0); $$ = $4; }
                         | ENUM LBRACE initializer_list RBRACE               { $$ = $3; }
-                        | ENUM IDENTIFIER                                   { insert($1, 1, 0, 0, 0); $$ = NULL; }
+                        | ENUM IDENTIFIER                                   { insert($2, 1, 0, 0, 0); $$ = NULL; }
                         ;
 
     /* Unary operators. */
