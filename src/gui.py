@@ -97,6 +97,12 @@ class Ui_MainWindow(object):
     
     def compileButtonAction(self):
         print("compileButtonAction")
+        if(exists("output.asm")):
+            remove("output.asm")
+        if(exists("error.txt")):
+            remove("error.txt")
+        if(exists("symbol_table.txt")):
+            remove("symbol_table.txt")
         if(not exists(compilerRunLocation)) :
             print("compilerRunLocation not exists")
             system("make")
@@ -106,22 +112,32 @@ class Ui_MainWindow(object):
         textFile.close()
         system(f"{compilerRunLocation} temp.c")
         remove("temp.c")
+        
         self.outputQuads()
         self.outputErrors()
         self.outputSymTable()
     
     def outputQuads(self):
         print("outputQuads")
-        self.textBrowser_5.setPlainText(open("output.asm").read())
+        outputstr = ""
+        if(exists("output.asm")):
+            outputstr = open("output.asm").read()
+        self.textBrowser_5.setPlainText(outputstr)
 
     def outputErrors(self):
         print("outputErrors")
-        #self.textBrowser_4.setPlainText(open("output.err").read())
-        self.textBrowser_4.setPlainText("Errors and Warnings")
+        outErr = ""
+        if(exists("error.txt")):
+            outErr = open("error.txt").read()
+        self.textBrowser_4.setPlainText(outErr)
+        #self.textBrowser_4.setPlainText("Errors and Warnings")
 
     def outputSymTable(self):
         print("outputSymTable")
-        self.textBrowser.setPlainText(open("symbol_table.txt").read())
+        symtb = ""
+        if(exists("symbol_table.txt")):
+            symtb = open("symbol_table.txt").read()
+        self.textBrowser.setPlainText(symtb)
         #self.textBrowser.setPlainText("Symbol Table")
 
 if __name__ == "__main__":
