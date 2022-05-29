@@ -18,6 +18,14 @@
     _Bool boolValue;
     struct AST_Node *nodePointer;
     struct SymbolTableEntry *entryPointer;
+    struct PairType {
+        struct AST_Node *nodePointer;
+        union
+        {
+            int enumValue;
+            enum TYPE *enumPointer;
+        };
+    } pair;
     int enumValue;
     enum TYPE *enumPointer;
 }
@@ -49,9 +57,12 @@
 %type <nodePointer>block_statement block_item_list statement jump_statement selection_statement iteration_statement switch_case switch_case_list
 %type <nodePointer>literal
 
-%type <entryPointer>function_declaration parameterized_identifier
+
 %type <enumValue>unary_op assignment_op type_modifier
-%type <enumPointer>type_modifier_list 
+%type <entryPointer>function_declaration parameterized_identifier
+%type <pair>type_modifier_list
+%type <nodePointer>enum_type
+%type <enumPointer>type_modifier_items
 
 %%
 
@@ -67,8 +78,8 @@ top_level_statement     : declaration SEMICOLON
                         ;
 
     /* A declaration consists of a type, and optionally initializers. */
-declaration             : type_modifier_list initializer_list       { $$ = change_list_params($2, $1); }
-                        | type_modifier_list                        { $$ = NULL; }
+declaration             : type_modifier_list initializer_list       { $$ = $1.nodePointer == NULL ? change_list_params($2, $1.enumPointer) : operation_node(COMMA_OP, $1.nodePointer, change_list_params($2, $1.enumPointer)); }
+                        | type_modifier_list                        { $$ = $1.nodePointer; }
                         ;
 
     /* Initializiers can be compounded using commas. */
@@ -279,10 +290,14 @@ finally_block           : FINALLY { scope_down(); } block_statement { scope_up()
     /* MISCELLANEOUS */
 
     /* A sequence of type modifiers. Need semantic checks.*/
-type_modifier_list      : type_modifier_list type_modifier      { $$ = insert_into_array($1, $2); }
-                        | type_modifier_list CONST              { $$ = insert_into_array($1, CONST_TYPE); }
-                        | type_modifier                         { $$ = insert_into_array(NULL, $1); }
-                        | CONST                                 { $$ = insert_into_array(NULL, CONST_TYPE); }
+type_modifier_list      : enum_type                         { struct PairType tmp = { .nodePointer = $1,   .enumPointer = insert_into_array(NULL, ENUM_TYPE) }; $$ = tmp; }
+                        | type_modifier_items               { struct PairType tmp = { .nodePointer = NULL, .enumPointer = $1 }; $$ = tmp; }
+                        ;
+
+type_modifier_items     : type_modifier_items type_modifier { $$ = insert_into_array($1, $2); }
+                        | type_modifier_items CONST         { $$ = insert_into_array($1, CONST_TYPE); }
+                        | type_modifier                     { $$ = insert_into_array(NULL, $1); }
+                        | CONST                             { $$ = insert_into_array(NULL, CONST_TYPE); }
                         ;
 
     /* A type modifier is a data type. */
@@ -297,13 +312,12 @@ type_modifier           : BOOL                  { $$ = BOOL_TYPE; }
                         | STRING                { $$ = STRING_TYPE; }
                         | UNSIGNED              { $$ = UNSIGNED_TYPE; }
                         | VOID                  { $$ = VOID_TYPE; }
-                        | enum_type             { $$ = ENUM_TYPE; }
                         ;
 
     /* An enum type is ENUM followed by an identifier, or an (optionally anonymous) enum declaration. */
-enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE
-                        | ENUM LBRACE initializer_list RBRACE
-                        | ENUM IDENTIFIER
+enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE    { insert($1, 1, 1, 0, 0); $$ = $4; }
+                        | ENUM LBRACE initializer_list RBRACE               { $$ = $3; }
+                        | ENUM IDENTIFIER                                   { insert($1, 1, 0, 0, 0); $$ = NULL; }
                         ;
 
     /* Unary operators. */
