@@ -121,8 +121,8 @@ class Ui_MainWindow(object):
 
     def outputSymTable(self):
         print("outputSymTable")
-        #self.textBrowser_3.setPlainText(open("output.sym").read())
-        self.textBrowser.setPlainText("Symbol Table")
+        self.textBrowser.setPlainText(open("symbol_table.txt").read())
+        #self.textBrowser.setPlainText("Symbol Table")
 
 if __name__ == "__main__":
     import sys

@@ -5,6 +5,7 @@
 extern int yyparse();
 extern FILE *yyin;
 extern FILE *output_file;
+extern FILE * output_file_symbol_table;
 
 extern void create_program();
 extern void scope_down();
@@ -43,6 +44,14 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    char *output_filename_st = "symbol_table.txt";
+    output_file_symbol_table = fopen(output_filename_st, "w");
+    if (output_file_symbol_table == NULL)
+    {
+        fprintf(stderr, "Error: Could not open file %s\n", output_filename_st);
+        return 1;
+    }
+
     create_program();
 
     scope_down();
@@ -72,6 +81,8 @@ int main(int argc, char **argv)
 
     destroy_global_table();
     destroy_program();
+
+    fclose(output_file_symbol_table);
 
     printf("\nCleanup successful.\n");
 
