@@ -91,7 +91,7 @@ void scope_down()
 
 void scope_up()
 {
-    // print_table(0);
+    print_table();
     struct SymbolTable *old_scope = current_scope;
     current_scope = old_scope->parent;
     // destroy_table(old_scope);
@@ -110,7 +110,7 @@ struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool need_init, _
         semantic_error = IS_A_FUNCTION;
     else if (found->is_init == 0 && func == 1)
         semantic_error = UNDEFINED_FUNCTION;
-    else if (found->is_init == 0 && need_init == 0 && found->is_param == 0)
+    else if (found->is_init == 0 && need_init && found->is_param == 0)
         semantic_error = UNINITIALIZED_IDENTIFIER;
     else
     {

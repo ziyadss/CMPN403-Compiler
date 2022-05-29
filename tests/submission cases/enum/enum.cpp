@@ -10,7 +10,7 @@ enum NAMES
 int main()
 {
     enum NAMES n;
-    n=AHMED;
+    n = AHMED;
 
     enum NAMES z = n;
     return 0;

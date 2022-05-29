@@ -1,0 +1,19 @@
+b4, 
+Parent: i4, 
+Parent: main
+Parent: Global Scope
+
+
+Parent: x4, i4, 
+Parent: main
+Parent: Global Scope
+
+
+Parent: x4, i4, 
+Parent: main
+Parent: Global Scope
+
+x4, i4, 
+Parent: main
+Parent: Global Scope
+

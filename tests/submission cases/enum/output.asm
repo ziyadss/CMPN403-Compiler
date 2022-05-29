@@ -1,0 +1,14 @@
+MOV AHMED, 0
+MOV KHALED, 1
+MOV MAZEN, 2
+MOV MUHAB, 3
+MOV ZIYAD, 4
+
+main:
+POP retadr
+MOV n, AHMED
+MOV z, n
+MOV retval, 0
+PUSH retadr
+RET
+

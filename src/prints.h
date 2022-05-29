@@ -9,6 +9,6 @@
 #include "stb_ds.h"
 
 void print_program();
-void print_table(unsigned int line);
+void print_table();
 
 #endif // PRINTS_H

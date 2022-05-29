@@ -171,11 +171,9 @@ void print_program()
     printf("\nPROGRAM END\n");
 }
 
-void print_table(unsigned int line)
+void print_table()
 {
     struct SymbolTable *table = current_scope;
-    // printf("\n\nSymbol table for line %d:\n", line);
-    fprintf(symbol_file, "\nAt line %d, current table: ", line);
     while (table != NULL)
     {
         for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
