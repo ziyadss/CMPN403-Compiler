@@ -65,6 +65,8 @@ int main(int argc, char **argv)
 
     scope_down();
 
+    printf("Parsing...\n");
+
     yyparse();
 
     fclose(yyin);

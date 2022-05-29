@@ -78,17 +78,17 @@ top_level_statement     : declaration SEMICOLON
                         ;
 
     /* A declaration consists of a type, and optionally initializers. */
-declaration             : type_modifier_list initializer_list       { struct AST_Node *identifiers = change_list_params($2, $1.enumPointer, 0); if (identifiers==NULL) YYERROR; else $$ = $1.nodePointer == NULL ? identifiers : operation_node(COMMA_OP, $1.nodePointer, identifiers); }
+declaration             : type_modifier_list initializer_list       { struct AST_Node *tmp = change_list_params($2, $1.enumPointer, 0); if (tmp==NULL) YYERROR; else $$ = $1.nodePointer == NULL ? tmp : operation_node(COMMA_OP, $1.nodePointer, tmp); if ($$ == NULL) YYERROR; }
                         | type_modifier_list                        { $$ = $1.nodePointer; }
                         ;
 
     /* Initializiers can be compounded using commas. */
-initializer_list        : initializer_list COMMA initializer        { $$ = operation_node(COMMA_OP, $1, $3); }
+initializer_list        : initializer_list COMMA initializer        { $$ = operation_node(COMMA_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | initializer
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { struct SymbolTableEntry* symbol = insert($1, 0, 1, 0, 0); if (symbol==NULL) YYERROR; else $$ = operation_node(ASSIGN_OP, identifier_node(symbol), $3); }
+initializer             : IDENTIFIER ASSIGN assign_expression       { struct SymbolTableEntry* symbol = insert($1, 0, 1, 0, 0); if (symbol==NULL) YYERROR; else $$ = operation_node(ASSIGN_OP, identifier_node(symbol), $3); if ($$ == NULL) YYERROR; }
                         | IDENTIFIER                                { struct SymbolTableEntry* symbol = insert($1, 0, 0, 0, 0); if (symbol==NULL) YYERROR; else $$ = identifier_node(symbol); }
                         ;
 
@@ -107,7 +107,7 @@ function                : parameterized_identifier parameter_list RPAREN block_s
                         ;
 
     /* A parameter list is a comma-separated list of parameters. */
-parameter_list          : parameter_list COMMA parameter                                    { $$ = operation_node(COMMA_OP, $1, $3); }
+parameter_list          : parameter_list COMMA parameter                                    { $$ = operation_node(COMMA_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | parameter
                         ;
 
@@ -126,12 +126,12 @@ parameter               : type_modifier_list initializer                        
     */
 
     /* Any expression is a comma-separated list of assignment expressions. */
-expression              : expression COMMA assign_expression            { $$ = operation_node(COMMA_OP, $1, $3); }
+expression              : expression COMMA assign_expression            { $$ = operation_node(COMMA_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | assign_expression
                         ;
 
     /* An assignment expression is either an assignment expression or decays to a ternary expression. */
-assign_expression       : IDENTIFIER assignment_op assign_expression    { struct SymbolTableEntry* symbol = lookup($1, 0, $2!=ASSIGN_OP, $2==ASSIGN_OP); if (symbol == NULL) YYERROR; else $$ = operation_node($2, identifier_node(symbol), $3); }
+assign_expression       : IDENTIFIER assignment_op assign_expression    { struct SymbolTableEntry* symbol = lookup($1, 0, $2!=ASSIGN_OP, $2==ASSIGN_OP); if (symbol == NULL) YYERROR; else $$ = operation_node($2, identifier_node(symbol), $3); if ($$ == NULL) YYERROR; }
                         | ternary_expression
                         ;
 
@@ -141,72 +141,72 @@ ternary_expression      : or_expression QUESTION expression COLON ternary_expres
                         ;
 
     /* A logical or expression is either a logical or expression or decays to a logical and expression. */
-or_expression           : or_expression OR and_expression               { $$ = operation_node(OR_OP, $1, $3); }
+or_expression           : or_expression OR and_expression               { $$ = operation_node(OR_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | and_expression
                         ;
 
     /* A logical and expression is either a logical and expression or decays to a bitwise or expression. */
-and_expression          : and_expression AND bit_or_expression          { $$ = operation_node(AND_OP, $1, $3); }
+and_expression          : and_expression AND bit_or_expression          { $$ = operation_node(AND_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | bit_or_expression
                         ;
 
     /* A bitwise or expression is either a bitwise or expression or decays to a bitwise xor expression. */
-bit_or_expression       : bit_or_expression BIT_OR xor_expression       { $$ = operation_node(BIT_OR_OP, $1, $3); }
+bit_or_expression       : bit_or_expression BIT_OR xor_expression       { $$ = operation_node(BIT_OR_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | xor_expression
                         ;
 
     /* An xor expression is either an xor expression or decays to a bitwise and expression. */
-xor_expression          : xor_expression XOR bit_and_expression         { $$ = operation_node(XOR_OP, $1, $3); }
+xor_expression          : xor_expression XOR bit_and_expression         { $$ = operation_node(XOR_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | bit_and_expression
                         ;
 
     /* A bitwise and expression is either a bitwise and expression or decays to an equality expression. */
-bit_and_expression      : bit_and_expression BIT_AND equal_expression   { $$ = operation_node(BIT_AND_OP, $1, $3); }
+bit_and_expression      : bit_and_expression BIT_AND equal_expression   { $$ = operation_node(BIT_AND_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | equal_expression
                         ;
 
     /* An equality expression is either an equality expression or decays to a comparison expression. */
-equal_expression        : equal_expression EQ compare_expression        { $$ = operation_node(EQ_OP, $1, $3); }
-                        | equal_expression NE compare_expression        { $$ = operation_node(NE_OP, $1, $3); }
+equal_expression        : equal_expression EQ compare_expression        { $$ = operation_node(EQ_OP, $1, $3); if ($$ == NULL) YYERROR; }
+                        | equal_expression NE compare_expression        { $$ = operation_node(NE_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | compare_expression
                         ;
 
     /* A comparison expression is either a comparison expression or decays to a shift expression. */
-compare_expression      : compare_expression LT shift_expression        { $$ = operation_node(LT_OP, $1, $3); }
-                        | compare_expression GT shift_expression        { $$ = operation_node(GT_OP, $1, $3); }
-                        | compare_expression LE shift_expression        { $$ = operation_node(LE_OP, $1, $3); }
-                        | compare_expression GE shift_expression        { $$ = operation_node(GE_OP, $1, $3); }
+compare_expression      : compare_expression LT shift_expression        { $$ = operation_node(LT_OP, $1, $3); if ($$ == NULL) YYERROR; }
+                        | compare_expression GT shift_expression        { $$ = operation_node(GT_OP, $1, $3); if ($$ == NULL) YYERROR; }
+                        | compare_expression LE shift_expression        { $$ = operation_node(LE_OP, $1, $3); if ($$ == NULL) YYERROR; }
+                        | compare_expression GE shift_expression        { $$ = operation_node(GE_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | shift_expression
                         ;
 
     /* A shift expression is either a shift expression or decays to an addition expression. */
-shift_expression        : shift_expression SHL add_expression           { $$ = operation_node(SHL_OP, $1, $3); }
-                        | shift_expression SHR add_expression           { $$ = operation_node(SHR_OP, $1, $3); }
+shift_expression        : shift_expression SHL add_expression           { $$ = operation_node(SHL_OP, $1, $3); if ($$ == NULL) YYERROR; }
+                        | shift_expression SHR add_expression           { $$ = operation_node(SHR_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | add_expression
                         ;
 
     /* An addition expression is either an addition expression or decays to a multiplication expression. */
-add_expression          : add_expression ADD mul_expression             { $$ = operation_node(ADD_OP, $1, $3); }
-                        | add_expression SUB mul_expression             { $$ = operation_node(SUB_OP, $1, $3); }
+add_expression          : add_expression ADD mul_expression             { $$ = operation_node(ADD_OP, $1, $3); if ($$ == NULL) YYERROR; }
+                        | add_expression SUB mul_expression             { $$ = operation_node(SUB_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | mul_expression
                         ;
 
     /* A multiplication expression is either a multiplication expression or decays to a prefix expression. */
-mul_expression          : mul_expression MUL prefix_expression          { $$ = operation_node(MUL_OP, $1, $3); }
-                        | mul_expression DIV prefix_expression          { $$ = operation_node(DIV_OP, $1, $3); }
-                        | mul_expression MOD prefix_expression          { $$ = operation_node(MOD_OP, $1, $3); }
+mul_expression          : mul_expression MUL prefix_expression          { $$ = operation_node(MUL_OP, $1, $3); if ($$ == NULL) YYERROR; }
+                        | mul_expression DIV prefix_expression          { $$ = operation_node(DIV_OP, $1, $3); if ($$ == NULL) YYERROR; }
+                        | mul_expression MOD prefix_expression          { $$ = operation_node(MOD_OP, $1, $3); if ($$ == NULL) YYERROR; }
                         | prefix_expression
                         ;
 
     /* A prefix expression is either a prefix expression or decays to a postfix expression. */
-prefix_expression       : unary_op prefix_expression                    { $$ = operation_node($1, NULL, $2); }
+prefix_expression       : unary_op prefix_expression                    { $$ = operation_node($1, NULL, $2); if ($$ == NULL) YYERROR; }
                         | postfix_expression
                         ;
 
     /* A postfix expression is either a postfix expression (including a function call) or decays to a base expression. */
-postfix_expression      : postfix_expression INC                        { $$ = operation_node(INC_OP, $1, NULL); }
-                        | postfix_expression DEC                        { $$ = operation_node(DEC_OP, $1, NULL); }
-                        | IDENTIFIER LPAREN optional_expression RPAREN  { struct SymbolTableEntry* symbol = lookup($1, 1, 1, 0); if (symbol == NULL) YYERROR; else $$ = call_node(identifier_node(symbol), $3); }
+postfix_expression      : postfix_expression INC                        { $$ = operation_node(INC_OP, $1, NULL); if ($$ == NULL) YYERROR; }
+                        | postfix_expression DEC                        { $$ = operation_node(DEC_OP, $1, NULL); if ($$ == NULL) YYERROR; }
+                        | IDENTIFIER LPAREN optional_expression RPAREN  { struct SymbolTableEntry* symbol = lookup($1, 1, 1, 0); if (symbol == NULL) YYERROR; else $$ = call_node(identifier_node(symbol), $3); if ($$ == NULL) YYERROR; }
                         | base_expression
                         ;
 
@@ -256,7 +256,7 @@ switch_case_list        : switch_case_list switch_case                          
                         ;
 
     /* The two case types of a switch case. */
-switch_case             : CASE ternary_expression COLON block_item_list         { $$ = if_node(operation_node(EQ_OP, NULL, $2), $4, NULL); }
+switch_case             : CASE ternary_expression COLON block_item_list         { struct AST_Node* tmp = operation_node(EQ_OP, NULL, $2); if (tmp==NULL) YYERROR; else $$ = if_node(tmp, $4, NULL); }
                         | DEFAULT COLON block_item_list                         { $$ = $3; }
                         ;
 
@@ -270,7 +270,7 @@ iteration_statement     : WHILE LPAREN expression RPAREN statement              
     /* Jump statements are ones which affect control flow. */
 jump_statement          : CONTINUE SEMICOLON                                { $$ = continue_node(); }
                         | BREAK SEMICOLON                                   { $$ = break_node(); }
-                        | RETURN optional_expression SEMICOLON              { $$ = operation_node(RET_OP, $2, NULL); }
+                        | RETURN optional_expression SEMICOLON              { $$ = operation_node(RET_OP, $2, NULL); if ($$ == NULL) YYERROR; }
                         | THROW optional_expression SEMICOLON               { $$ = $2; }
                         ;
 

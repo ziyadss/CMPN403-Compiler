@@ -75,6 +75,7 @@ struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init,
     entry->is_func = is_func;
     entry->is_const = is_const;
     entry->is_param = is_param;
+    entry->main_type = INVALID;
 
     current_scope->buckets[bucket] = entry;
 
@@ -151,11 +152,11 @@ char *get_error_message()
     }
 }
 
-_Bool verify_type(enum TYPE *types)
+enum TYPE verify_type(enum TYPE *types)
 {
     unsigned int size = arrlen(types);
     if (size > 4)
-        return 0;
+        return -1;
 
     // check they are unique and get non-const types
     int type[3] = {-1, -1, -1};
@@ -166,19 +167,29 @@ _Bool verify_type(enum TYPE *types)
             type[j++] = types[i];
         for (unsigned int j = i + 1; j < size; j++)
             if (types[i] == types[j])
-                return 0;
+                return -1;
     }
 
     // check not 'const'
     if (j == 0)
-        return 0;
+        return -1;
 
     // search for ones that may be bundled only with const: 0,3,7,8,9,10,11
     for (unsigned int i = 0; i < j; i++)
     {
-        if (type[i] == 0 || type[i] == 3 || type[i] == 7 || type[i] == 8 || type[i] == 9 || type[i] == 10 || type[i] == 11)
-            return size == 1;
+        if (type[i] == 0 || type[i] == 7 || type[i] == 9 || type[i] == 11)
+            return size == 1 ? INT_TYPE : -1;
+        if (type[i] == 3)
+            return (size == 1) ? FLOAT_TYPE : -1;
+        if (type[i] == 8 || type[i] == 10)
+            return (size == 1) ? VOID_TYPE : -1;
     }
+
+    // check if 2 exists, if so, return j == 1 or j==2 and new_list[!i] is 5
+    if (type[0] == 2)
+        return ((j == 1) || ((j == 2) && (type[1] == 5))) ? FLOAT_TYPE : -1;
+    if (j > 1 && type[1] == 2)
+        return ((j == 2) && (type[1] == 5)) ? FLOAT_TYPE : -1;
 
     // remaining ones can be bundled with int so we remove it from the list
     int new_list[2] = {-1, -1};
@@ -190,48 +201,44 @@ _Bool verify_type(enum TYPE *types)
             new_list[j++] = type[i];
     }
     if (j == 0)
-        return 1;
+        return INT_TYPE;
 
     // check if 1 exists, if so, return j == 1 or j==2 and type[!i] is 7 or 9 - same for 5 and 6
     if (new_list[0] == 1)
-        return (j == 1) || ((j == 2) && (new_list[1] == 7 || new_list[1] == 9));
+        return ((j == 1) || ((j == 2) && (new_list[1] == 7 || new_list[1] == 9))) ? INT_TYPE : -1;
 
     if (j > 1 && new_list[1] == 1)
-        return (j == 2) && (new_list[1] == 7 || new_list[1] == 9);
+        return ((j == 2) && (new_list[1] == 7 || new_list[1] == 9)) ? INT_TYPE : -1;
 
     if (new_list[0] == 5)
-        return (j == 1) || ((j == 2) && (new_list[1] == 7 || new_list[1] == 9));
+        return ((j == 1) || ((j == 2) && (new_list[1] == 7 || new_list[1] == 9))) ? INT_TYPE : -1;
 
     if (j > 1 && new_list[1] == 5)
-        return (j == 2) && (new_list[1] == 7 || new_list[1] == 9);
+        return ((j == 2) && (new_list[1] == 7 || new_list[1] == 9)) ? INT_TYPE : -1;
 
     if (new_list[0] == 6)
-        return (j == 1) || ((j == 2) && (new_list[1] == 7 || new_list[1] == 9));
+        return ((j == 1) || ((j == 2) && (new_list[1] == 7 || new_list[1] == 9))) ? INT_TYPE : -1;
 
     if (j > 1 && new_list[1] == 6)
-        return (j == 2) && (new_list[1] == 7 || new_list[1] == 9);
-
-    // check if 2 exists, if so, return j == 1 or j==2 and new_list[!i] is 5
-    if (new_list[0] == 2)
-        return (j == 1) || ((j == 2) && (new_list[1] == 5));
-    if (j > 1 && new_list[1] == 2)
-        return (j == 2) && (new_list[1] == 5);
+        return ((j == 2) && (new_list[1] == 7 || new_list[1] == 9)) ? INT_TYPE : -1;
 
     assert(0);
-    return 0;
+    return -1;
 }
 
-void change_parameters(struct SymbolTableEntry *entry, enum TYPE *types, _Bool func, _Bool init, _Bool param)
+void change_parameters(struct SymbolTableEntry *entry, enum TYPE *types, _Bool func, _Bool init, _Bool param, enum TYPE main_type)
 {
     entry->types = types;
     entry->is_init = init;
     entry->is_param = param;
+    entry->main_type = main_type;
     (void *)func;
 }
 
 struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE *types, _Bool param)
 {
-    if (verify_type(types) == 0)
+    enum TYPE main_type = verify_type(types);
+    if (main_type == -1)
     {
         semantic_error = INVALID_TYPE;
         return NULL;
@@ -244,13 +251,13 @@ struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE
         switch (node->tag)
         {
         case NODE_TYPE_IDENTIFIER:
-            change_parameters(node->identifier, types, 0, 0, param);
+            change_parameters(node->identifier, types, 0, 0, param, main_type);
             return initializer_list;
         case NODE_TYPE_OPERATION:
             if (node->op == ASSIGN_OP)
             {
                 assert(node->left->tag == NODE_TYPE_IDENTIFIER);
-                change_parameters(node->left->identifier, types, 0, 1, param);
+                change_parameters(node->left->identifier, types, 0, 1, param, main_type);
                 return initializer_list;
             }
             else if (node->op == COMMA_OP)
@@ -259,12 +266,12 @@ struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE
                 {
                     assert(node->right->op == ASSIGN_OP);
                     assert(node->right->left->tag == NODE_TYPE_IDENTIFIER);
-                    change_parameters(node->right->left->identifier, types, 0, 1, param);
+                    change_parameters(node->right->left->identifier, types, 0, 1, param, main_type);
                 }
                 else
                 {
                     assert(node->right->tag == NODE_TYPE_IDENTIFIER);
-                    change_parameters(node->right->identifier, types, 0, 0, param);
+                    change_parameters(node->right->identifier, types, 0, 0, param, main_type);
                 }
                 node = node->left;
             }

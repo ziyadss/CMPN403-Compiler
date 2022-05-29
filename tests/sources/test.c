@@ -1,4 +1,6 @@
-int main()
+void main()
 {
-  return 0;
+  int x;
+  string a = "hi";
+  x = a;
 }

@@ -8,15 +8,8 @@ requirements, ordered by priority:
 AST and ASM for
 try-catch & stacktrace - current scope - lost in AST->ASM? found in refactored AST nodes?
 
-enums
-
 type conversion quadruples
 	on generation, if valid cast exists output cast quadruple, else return semantic error of invalid operands
 
 ASM for
 comparison in non-cond expressions
-
-
-notes:
-in insert, lookup func, check if defined but not decl then allow else deny
-operation two types

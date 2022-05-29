@@ -57,16 +57,46 @@ struct AST_Node *bool_node(_Bool value)
     return node;
 }
 
+enum TYPE get_type(struct AST_Node *node)
+{
+    if (node == NULL)
+        return INVALID;
+    switch (node->tag)
+    {
+    case NODE_TYPE_OPERATION:
+        return get_type(node->left);
+    case NODE_TYPE_IDENTIFIER:
+        return node->identifier->main_type;
+    case NODE_TYPE_INT:
+        return INT_TYPE;
+    case NODE_TYPE_FLOAT:
+        return FLOAT_TYPE;
+    case NODE_TYPE_CHAR:
+        return INT_TYPE;
+    case NODE_TYPE_STRING:
+        return VOID_TYPE;
+    case NODE_TYPE_BOOL:
+        return INT_TYPE;
+    default:
+        return VOID_TYPE;
+    }
+}
+
+_Bool compatible(enum TYPE type1, enum TYPE type2)
+{
+    return ((type1 == type2) || (type1 == INVALID) || (type2 == INVALID)) && (type1 != VOID_TYPE);
+}
+
 extern enum SEMANTIC_ERROR semantic_error;
 struct AST_Node *operation_node(enum OPERATION op, struct AST_Node *left, struct AST_Node *right)
 {
-    // enum TYPE left_type = left->tag;
-    // enum TYPE right_type = right->tag;
-    // if (compatible(left_type, right_type))
-    // {
-    //     semantic_error = INCOMPATIBLE_TYPES;
-    //     return NULL;
-    // }
+    enum TYPE left_type = get_type(left);
+    enum TYPE right_type = get_type(right);
+    if (compatible(left_type, right_type) == 0)
+    {
+        semantic_error = INCOMPATIBLE_TYPES;
+        return NULL;
+    }
     struct AST_Node *node = create_node();
     node->tag = NODE_TYPE_OPERATION;
     node->op = op;
