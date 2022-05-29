@@ -5,7 +5,7 @@
 extern int yyparse();
 extern FILE *yyin;
 extern FILE *output_file;
-extern FILE * output_file_symbol_table;
+extern FILE *output_file_symbol_table;
 
 extern void create_program();
 extern void scope_down();
