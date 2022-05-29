@@ -315,9 +315,9 @@ type_modifier           : BOOL                  { $$ = BOOL_TYPE; }
                         ;
 
     /* An enum type is ENUM followed by an identifier, or an (optionally anonymous) enum declaration. */
-enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE    { $$ = $4; }
+enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE    { insert($1, 1, 1, 0, 0); $$ = $4; }
                         | ENUM LBRACE initializer_list RBRACE               { $$ = $3; }
-                        | ENUM IDENTIFIER                                   { $$ = NULL; }
+                        | ENUM IDENTIFIER                                   { insert($1, 1, 0, 0, 0); $$ = NULL; }
                         ;
 
     /* Unary operators. */
