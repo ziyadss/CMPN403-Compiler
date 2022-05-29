@@ -1,5 +1,15 @@
+int foo()
+{
+    int x = 1;
+    float y;
+}
+
 int main()
 {
-    int x = 3;
-    return 0;
+    int a, b;
+
+    if (a)
+    {
+        char c = 'A';
+    }
 }

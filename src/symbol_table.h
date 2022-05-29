@@ -3,8 +3,11 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <string.h>
+
+#include "ast.h"
+#include "helpers.h"
+#include "prints.h"
 
 #define ST_ARRAY_SIZE 1
 #define HASH_SEED 0
@@ -32,7 +35,7 @@ struct SymbolTableEntry
     _Bool is_init;
     _Bool is_used;
     _Bool is_func;
-    _Bool is_func_parameter;
+    _Bool is_param;
     _Bool is_const;
 
     struct SymbolTableEntry *next;
@@ -52,22 +55,16 @@ enum SEMANTIC_ERROR
     UNDECLARED_IDENTIFIER,
     UNINITIALIZED_IDENTIFIER,
     NOT_A_FUNCTION,
-    IS_A_FUNCTION
+    IS_A_FUNCTION,
+    INVALID_TYPE
 };
 
-struct SymbolTableEntry *insert(char *, _Bool , _Bool , _Bool , _Bool );
+struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func, _Bool is_param);
 void scope_down();
 void scope_up();
-struct SymbolTableEntry *lookup(char *, _Bool , _Bool );
+struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init);
 
-_Bool changeParameters(char *, enum TYPE*, _Bool, _Bool );
-_Bool changeListParams(char **, enum TYPE*);
-
-enum TYPE* generate_array();
-enum TYPE* insert_into_array(enum TYPE*, enum TYPE );
-
-char **generate_char_array();
-char **insert_into_char_array(char **, char*);
-
+struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE *types);
+enum TYPE *insert_into_array(enum TYPE *arr, enum TYPE type);
 
 #endif // SYMBOL_TABLE_H

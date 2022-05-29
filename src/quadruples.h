@@ -7,9 +7,4 @@
 
 void quadruples();
 
-struct ReturnTuple {
-    struct AST_Node *AST_component;
-    char **char_array;
-};
-
 #endif // QUADRUPLES_H

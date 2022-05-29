@@ -19,8 +19,7 @@
     struct AST_Node *nodePointer;
     struct SymbolTableEntry *entryPointer;
     int enumValue;
-    enum TYPE* enumPointer;
-    struct ReturnTuple *returnTuplePointer;
+    enum TYPE *enumPointer;
 }
 
     /* Keywords. */
@@ -50,8 +49,7 @@
 
 %type <enumValue>unary_op assignment_op type_modifier
 
-%type <nodePointer>initializer function top_level_statement declaration
-%type <returnTuplePointer>initializer_list
+%type <nodePointer>initializer function top_level_statement declaration initializer_list
 %type <nodePointer>block_statement block_item_list statement
 
 %type <nodePointer>parameter parameter_list
@@ -75,13 +73,13 @@ top_level_statement     : declaration SEMICOLON
                         ;
 
     /* A declaration consists of a type, and optionally initializers. */
-declaration             : type_modifier_list initializer_list       { $$ = $2->AST_component; changeListParams($2->char_array, $1); }
+declaration             : type_modifier_list initializer_list       { $$ = change_list_params($2, $1); }
                         | type_modifier_list                        { $$ = NULL; }
                         ;
 
     /* Initializiers can be compounded using commas. */
-initializer_list        : initializer_list COMMA initializer        { $$->AST_component = operation_node(COMMA_OP, $1->AST_component, $3); $$->char_array = insert_into_char_array($$->char_array, $3->identifier->name); }
-                        | initializer                               { $$->AST_component = $1; $$->char_array = generate_char_array(); $$->char_array = insert_into_char_array($$->char_array, $1->identifier->name); }
+initializer_list        : initializer_list COMMA initializer        { $$ = operation_node(COMMA_OP, $1, $3); }
+                        | initializer
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
@@ -292,10 +290,10 @@ non_final_catch_block   : non_final_catch_block CATCH LPAREN type_modifier_list 
     /* MISCELLANEOUS */
 
     /* A sequence of type modifiers. Need semantic checks.*/
-type_modifier_list      : type_modifier_list type_modifier { $$ = insert_into_array($$, $2); }
-                        | type_modifier_list CONST { $$ = NULL; }
-                        | type_modifier         { $$ = generate_array(); insert_into_array($$, $1); }
-                        | CONST                 {$$ = NULL; }
+type_modifier_list      : type_modifier_list type_modifier      { $$ = insert_into_array($1, $2); }
+                        | type_modifier_list CONST              { $$ = NULL; }
+                        | type_modifier                         { $$ = insert_into_array(NULL, $1); }
+                        | CONST                                 { $$ = NULL; }
                         ;
 
     /* A type modifier is a data type. */
