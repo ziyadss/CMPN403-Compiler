@@ -93,6 +93,19 @@ void scope_down()
 void scope_up()
 {
     print_table();
+    for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
+    {
+        struct SymbolTableEntry *head = current_scope->buckets[i];
+        while (head != NULL)
+        {
+            struct SymbolTableEntry *next = head->next;
+            if (!(head->is_used))
+            {
+                printf("WARNING: Unused identifier '%s'\n", head->name);
+            }
+            head = next;
+        }
+    }
     struct SymbolTable *old_scope = current_scope;
     current_scope = old_scope->parent;
     // destroy_table(old_scope);
