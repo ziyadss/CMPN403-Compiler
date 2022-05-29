@@ -4,8 +4,6 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "symbol_table.h"
-
 enum OPERATION
 {
     RET_OP,
