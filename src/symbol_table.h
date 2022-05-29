@@ -25,7 +25,8 @@ enum TYPE
     STRING_TYPE,
     UNSIGNED_TYPE,
     VOID_TYPE,
-    ENUM_TYPE
+    ENUM_TYPE,
+    CONST_TYPE
 };
 
 struct SymbolTableEntry
