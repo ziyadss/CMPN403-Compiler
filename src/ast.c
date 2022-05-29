@@ -176,6 +176,17 @@ struct AST_Node *continue_node()
     return node;
 }
 
+// try-catch-finally
+struct AST_Node *try_node(struct AST_Node *try_block, struct AST_Node *catch_block, struct AST_Node *finally_block)
+{
+    struct AST_Node *node = create_node();
+    node->tag = NODE_TYPE_TRY;
+    node->left = try_block;
+    node->right = catch_block;
+    node->else_branch = finally_block;
+    return node;
+}
+
 void create_program()
 {
     program = create_node();
@@ -210,6 +221,11 @@ void destroy_ast(struct AST_Node *root)
         destroy_ast(root->condition);
         destroy_ast(root->then_branch);
         destroy_ast(root->initialization);
+        break;
+    case NODE_TYPE_TRY:
+        destroy_ast(root->try_block);
+        destroy_ast(root->catch_block);
+        destroy_ast(root->finally_block);
         break;
     case NODE_TYPE_FUNC_DEF:
     case NODE_TYPE_OPERATION:

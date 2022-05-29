@@ -331,6 +331,19 @@ void _do_while(struct AST_Node *statement)
     fprintf(output_file, "%s L%d\n\nL%d:\n", reverse_jump(jmp), lbl1, lbl2);
 }
 
+void _try(struct AST_Node *statement)
+{
+    int lbl1 = _label_count();
+    int lbl2 = _label_count();
+    int lbl3 = _label_count();
+    int lbl4 = _label_count();
+    fprintf(output_file, "L%d:\n", lbl1);
+    _node(statement->then_branch, 1, 0, lbl2, lbl3);
+    fprintf(output_file, "JMP L%d\n\nL%d:\n", lbl4, lbl2);
+    _node(statement->else_branch, 1, 0, lbl4, lbl3);
+    fprintf(output_file, "\nL%d:\n", lbl4);
+}
+
 char *_node(struct AST_Node *statement, _Bool left, _Bool ternary, int label, int label_cont)
 {
     char *ret = NULL;
@@ -357,6 +370,9 @@ char *_node(struct AST_Node *statement, _Bool left, _Bool ternary, int label, in
         break;
     case NODE_TYPE_CONTINUE:
         fprintf(output_file, "JMP L%d\n", label_cont);
+        break;
+    case NODE_TYPE_TRY:
+        _try(statement);
         break;
     case NODE_TYPE_STATEMENTS:
         _block(statement, label, label_cont);
@@ -565,6 +581,14 @@ char *_operation(struct AST_Node *operation, _Bool left)
         }
         fprintf(output_file, "PUSH retadr\nRET\n");
         break;
+    case THROW_OP:
+        if (operation->left != NULL)
+        {
+            if (operation->left->tag == NODE_TYPE_OPERATION)
+                _operation_dst(ret, operation->left);
+            else
+                fprintf(output_file, "MOV %s, %s\n", ret, _node(operation->left, 1, 1, 0, 0));
+        }
     case COMMA_OP:
         _node(operation->left, 1, 0, 0, 0);
         _node(operation->right, 0, 0, 0, 0);

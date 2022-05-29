@@ -55,6 +55,7 @@
 %type <nodePointer>compare_expression shift_expression add_expression mul_expression prefix_expression postfix_expression base_expression optional_expression
 %type <nodePointer>initializer initializer_list function top_level_statement declaration parameter parameter_list
 %type <nodePointer>block_statement block_item_list statement jump_statement selection_statement iteration_statement switch_case switch_case_list
+%type <nodePointer>try_block catch_block finally_block try_statement
 %type <nodePointer>literal
 
 
@@ -228,7 +229,7 @@ statement               : { scope_down(); } block_statement { scope_up(); $$ = $
                         | selection_statement
                         | iteration_statement
                         | jump_statement
-                        | try_statement                     { $$ = NULL; }
+                        | try_statement
                         | optional_expression SEMICOLON
                         | declaration SEMICOLON
                         | error SEMICOLON                   { $$ = NULL; yyerror("Invalid statement"); }
@@ -271,21 +272,21 @@ iteration_statement     : WHILE LPAREN expression RPAREN statement              
 jump_statement          : CONTINUE SEMICOLON                                { $$ = continue_node(); }
                         | BREAK SEMICOLON                                   { $$ = break_node(); }
                         | RETURN optional_expression SEMICOLON              { $$ = operation_node(RET_OP, $2, NULL); }
-                        | THROW optional_expression SEMICOLON               { $$ = $2; }
+                        | THROW expression SEMICOLON                        { $$ = operation_node(THROW_OP, $2, NULL); }
                         ;
 
     /* A try statement is a try block followed a catch block, and an optional finally block. */
-try_statement           : try_block catch_block
-                        | try_block catch_block finally_block
+try_statement           : try_block catch_block                                 { $$ = try_node($1, $2, NULL); }
+                        | try_block catch_block finally_block                   { $$ = try_node($1, $2, $3); }
                         ;
 
-catch_block             : CATCH { scope_down(); } block_statement { scope_up(); }
+catch_block             : CATCH { scope_down(); } block_statement { scope_up(); $$ = $3; }
                         ;
 
-try_block               : TRY { scope_down(); } block_statement { scope_up(); }
+try_block               : TRY { scope_down(); } block_statement { scope_up(); $$ = $3; }
                         ;
 
-finally_block           : FINALLY { scope_down(); } block_statement { scope_up(); }
+finally_block           : FINALLY { scope_down(); } block_statement { scope_up(); $$ = $3; }
                         ;
 
     /* MISCELLANEOUS */
