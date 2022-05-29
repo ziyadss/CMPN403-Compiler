@@ -83,8 +83,8 @@ initializer_list        : initializer_list COMMA initializer        { $$ = opera
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0, 0)), $3); }
-                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0, 0)); }
+initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0, 0)), $3);printf("hereee\n"); }
+                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0, 0)) ;printf("hereee\n");}
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
