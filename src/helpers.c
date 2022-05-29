@@ -25,9 +25,3 @@ int asprintf(char **ret, const char *format, ...)
 
     return count;
 }
-
-int* generateArray()
-{
-	int* Arr = NULL;
-	return Arr;
-}

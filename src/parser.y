@@ -27,6 +27,7 @@
         };
     } pair;
     int enumValue;
+    enum TYPE *enumPointer;
 }
 
     /* Keywords. */
@@ -50,20 +51,23 @@
     /* Identifier. */
 %token <stringValue>IDENTIFIER
 
-%type <nodePointer>expression assign_expression ternary_expression or_expression and_expression bit_or_expression xor_expression bit_and_expression equal_expression compare_expression shift_expression add_expression mul_expression prefix_expression postfix_expression base_expression optional_expression
-
+%type <nodePointer>expression assign_expression ternary_expression or_expression and_expression bit_or_expression xor_expression bit_and_expression equal_expression
+%type <nodePointer>compare_expression shift_expression add_expression mul_expression prefix_expression postfix_expression base_expression optional_expression
+%type <nodePointer>initializer initializer_list function top_level_statement declaration parameter parameter_list
+%type <nodePointer>block_statement block_item_list statement jump_statement selection_statement iteration_statement switch_case switch_case_list
 %type <nodePointer>literal
 
+ /*new*/
 %type <enumValue>unary_op assignment_op
 
 %type <nodePointer>initializer initializer_list function top_level_statement declaration
 %type <nodePointer>block_statement block_item_list statement
-
+ /*new*/
 %type <nodePointer>parameter parameter_list
-%type <entryPointer>function_declaration parameterized_identifier
-%type <nodePointer>jump_statement selection_statement iteration_statement
 
-%type <nodePointer>switch_case switch_case_list
+%type <entryPointer>function_declaration parameterized_identifier
+%type <enumValue>unary_op assignment_op type_modifier
+%type <enumPointer>type_modifier_list 
 
 %type <pair>type_modifier
 %type <nodePointer>enum_type
@@ -83,7 +87,7 @@ top_level_statement     : declaration SEMICOLON
                         ;
 
     /* A declaration consists of a type, and optionally initializers. */
-declaration             : type_modifier_list initializer_list       { $$ = $1.nodePointer == NULL ? $2 : operation_node(COMMA_OP, $1.nodePointer, $2); }
+declaration             : type_modifier_list initializer_list       { $$ = $1.nodePointer == NULL ? change_list_params($2, $1) : operation_node(COMMA_OP, $1.nodePointer, change_list_params($2, $1)); }
                         | type_modifier_list                        { $$ = $1.nodePointer; }
                         ;
 
@@ -93,16 +97,16 @@ initializer_list        : initializer_list COMMA initializer        { $$ = opera
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0)), $3); }
-                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0)); }
+initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0, 0)), $3); }
+                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0, 0)); }
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
 
-parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { $$ = insert($2, 1, 1, 1); scope_down();  }
+parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { $$ = insert($2, 1, 1, 1, 0); scope_down();  }
                         ;
 
-function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = insert($2, 1, 1, 1); }
+function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { $$ = insert($2, 1, 1, 1, 0); }
                         ;
 
 function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); $$ = function_node($1, $2, $4); }
@@ -229,7 +233,7 @@ optional_expression     : expression
     /* STATEMENTS */
 
     /* A statement is one of a block, selection, iteration, jump, a semicolon optionally preceded by an expression, a try or a declaration followed by a semicolon. */
-statement               : { scope_down(); } block_statement  { scope_up(); $$ = $2; }
+statement               : { scope_down(); } block_statement { scope_up(); $$ = $2; }
                         | selection_statement
                         | iteration_statement
                         | jump_statement
@@ -278,32 +282,27 @@ jump_statement          : CONTINUE SEMICOLON                                { $$
                         | THROW optional_expression SEMICOLON               { $$ = $2; }
                         ;
 
-    /* A try statement is a try block followed by one or more catch blocks, and an optional finally block. */
-
-try_start               : TRY { scope_down(); } block_statement { scope_up(); }
+    /* A try statement is a try block followed a catch block, and an optional finally block. */
+try_statement           : try_block catch_block
+                        | try_block catch_block finally_block
                         ;
 
-try_statement           : try_start catch_block_list
-                        | try_start catch_block_list FINALLY { scope_down(); } block_statement { scope_up(); }
+catch_block             : CATCH { scope_down(); } block_statement { scope_up(); }
                         ;
 
-    /* A catch block list is a sequence of CATCHes and statements, the last which can be a catch-all. */
-catch_block_list        : non_final_catch_block CATCH { scope_down(); } block_statement { scope_up(); }
-                        | non_final_catch_block
-                        | CATCH { scope_down(); } block_statement { scope_up(); }
+try_block               : TRY { scope_down(); } block_statement { scope_up(); }
                         ;
 
-non_final_catch_block   : non_final_catch_block CATCH LPAREN type_modifier_list IDENTIFIER RPAREN { scope_down(); } block_statement { scope_up(); }
-                        | CATCH LPAREN type_modifier_list IDENTIFIER RPAREN { scope_down(); } block_statement { scope_up(); }
+finally_block           : FINALLY { scope_down(); } block_statement { scope_up(); }
                         ;
 
     /* MISCELLANEOUS */
 
     /* A sequence of type modifiers. Need semantic checks.*/
-type_modifier_list      : type_modifier_list type_modifier  { struct PairType tmp = { .nodePointer = $2.nodePointer, .enumPointer = &$2.enumValue }; $$ = tmp; }
-                        | type_modifier_list CONST          { struct PairType tmp = { .nodePointer = NULL, .enumPointer = NULL }; $$ = tmp; }
-                        | type_modifier                     { struct PairType tmp = { .nodePointer = $1.nodePointer, .enumPointer = &$1.enumValue }; $$ = tmp; }
-                        | CONST                             { struct PairType tmp = { .nodePointer = NULL, .enumPointer = NULL }; $$ = tmp; }
+type_modifier_list      : type_modifier_list type_modifier  { struct PairType tmp = { .nodePointer = insert_into_array($1.nodePointer, $2.nodePointer), .enumPointer = &$2.enumValue }; $$ = tmp; }
+                        | type_modifier_list CONST          { struct PairType tmp = { .nodePointer = insert_into_array($1.nodePointer, CONST_TYPE), .enumPointer = NULL }; $$ = tmp; }
+                        | type_modifier                     { struct PairType tmp = { .nodePointer = insert_into_array(NULL, $1.nodePointer), .enumPointer = &$1.enumValue }; $$ = tmp; }
+                        | CONST                             { struct PairType tmp = { .nodePointer = insert_into_array(NULL, CONST_TYPE), .enumPointer = NULL }; $$ = tmp; }
                         ;
 
     /* A type modifier is a data type. */
