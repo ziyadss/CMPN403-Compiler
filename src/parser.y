@@ -81,12 +81,12 @@ declaration             : type_modifier_list initializer_list       { $$ = $2->A
 
     /* Initializiers can be compounded using commas. */
 initializer_list        : initializer_list COMMA initializer        { $$->AST_component = operation_node(COMMA_OP, $1->AST_component, $3); $$->char_array = insert_into_char_array($$->char_array, $3->identifier->name); }
-                        | initializer                               { $$->AST_component = $1; $$->char_array = generate_char_array(); $$->char_array = insert_into_char_array($$->char_array, $1->identifier->name); }
+                        | initializer                               { $$->char_array = generate_char_array() ;printf("here1:::%s\n",$1->left->identifier->name); $$->AST_component = $1;  $$->char_array = insert_into_char_array($$->char_array, $1->left->identifier->name); }
                         ;
 
     /* An initializer is an identifier optionally assigned an assignment expression. */
-initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0, 0)), $3); }
-                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0, 0)); }
+initializer             : IDENTIFIER ASSIGN assign_expression       { $$ = operation_node(ASSIGN_OP, identifier_node(insert($1, 0, 1, 0, 0)), $3);printf("hereee\n"); }
+                        | IDENTIFIER                                { $$ = identifier_node(insert($1, 0, 0, 0, 0)) ;printf("hereee\n");}
                         ;
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */

@@ -160,6 +160,7 @@ char *get_error_message()
 
 enum TYPE* generate_array() 
 {
+    printf("generate_array\n");
     enum TYPE* arr = NULL;    
     return arr;
 }
@@ -167,12 +168,14 @@ enum TYPE* generate_array()
 
 enum TYPE* insert_into_array(enum TYPE *arr, enum TYPE type)
 {
+    printf("insert_into_array\n");
     arrput(arr, type);
     return arr;
 }
 
 void delete_array(enum TYPE **arr)
 {
+    printf("delete_array\n");
     if (arr == NULL)
         return;
 
@@ -183,18 +186,22 @@ void delete_array(enum TYPE **arr)
 //todo template later
 char **generate_char_array()
 {
+    printf("generate char array\n");
     char** arr = NULL; 
+    printf("generate char array\n");
     return arr;
 }
 
 char **insert_into_char_array(char **arr, char* identifier)
 {
+    printf("insert into char array\n");
     arrput(arr, identifier);
     return arr;
 }
 
 void delete_char_array(char ***arr)
 {
+    printf("delete char array\n");
     if (arr == NULL)
         return;
 
