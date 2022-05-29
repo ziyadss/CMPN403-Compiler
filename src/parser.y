@@ -94,14 +94,14 @@ initializer             : IDENTIFIER ASSIGN assign_expression       { struct Sym
 
     /* A function consists of type modifiers, an identifier, and optionally a paramater list and/or a body. */
 
-parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { struct SymbolTableEntry* symbol = insert($2, 1, 1, 1, 0); if (symbol == NULL) YYERROR; else $$ = symbol; scope_down();  }
+parameterized_identifier: type_modifier_list IDENTIFIER LPAREN                              { struct SymbolTableEntry* symbol = insert($2, 1, 0, 1, 0); if (symbol == NULL) YYERROR; else $$ = symbol; scope_down();  }
                         ;
 
-function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { struct SymbolTableEntry* symbol = insert($2, 1, 1, 1, 0); if (symbol == NULL) YYERROR; else $$ = symbol; }
+function_declaration    : type_modifier_list IDENTIFIER LPAREN RPAREN                       { struct SymbolTableEntry* symbol = insert($2, 1, 0, 1, 0); if (symbol == NULL) YYERROR; else $$ = symbol; }
                         ;
 
-function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); $$ = function_node($1, $2, $4); }
-                        | function_declaration { scope_down(); } block_statement            { scope_up(); $$ = function_node($1, NULL, $3); }
+function                : parameterized_identifier parameter_list RPAREN block_statement    { scope_up(); def_func($1); $$ = function_node($1, $2, $4); }
+                        | function_declaration { scope_down(); } block_statement            { scope_up(); def_func($1); $$ = function_node($1, NULL, $3); }
                         | parameterized_identifier parameter_list RPAREN RPAREN SEMICOLON   { scope_up(); $$ = function_node($1, $2, NULL); }
                         | function_declaration SEMICOLON                                    {             $$ = function_node($1, NULL, NULL); }
                         ;

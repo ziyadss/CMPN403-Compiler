@@ -108,6 +108,8 @@ struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init)
         semantic_error = NOT_A_FUNCTION;
     else if (found->is_func == 1 && func == 0)
         semantic_error = IS_A_FUNCTION;
+    else if (found->is_init == 0 && func == 1)
+        semantic_error = UNDEFINED_FUNCTION;
     else if (found->is_init == 0 && init == 0 && found->is_param == 0)
         semantic_error = UNINITIALIZED_IDENTIFIER;
     else
@@ -134,6 +136,10 @@ char *get_error_message()
         return "Identifier is a function";
     case INVALID_TYPE:
         return "Invalid type modifier combination";
+    case UNDEFINED_FUNCTION:
+        return "Function declared but not defined";
+    case INCOMPATIBLE_TYPES:
+        return "Operation between incompatible types";
     default:
         return "Unknown error";
     }
@@ -272,6 +278,12 @@ enum TYPE *insert_into_array(enum TYPE *arr, enum TYPE type)
 {
     arrput(arr, type);
     return arr;
+}
+
+void def_func(struct SymbolTableEntry *entry)
+{
+    entry->is_func = 1;
+    entry->is_init = 1;
 }
 
 void delete_array(enum TYPE **arr)

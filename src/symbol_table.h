@@ -57,7 +57,9 @@ enum SEMANTIC_ERROR
     UNINITIALIZED_IDENTIFIER,
     NOT_A_FUNCTION,
     IS_A_FUNCTION,
-    INVALID_TYPE
+    INVALID_TYPE,
+    UNDEFINED_FUNCTION,
+    INCOMPATIBLE_TYPES
 };
 
 struct SymbolTableEntry *insert(char *identifier, _Bool is_const, _Bool is_init, _Bool is_func, _Bool is_param);
@@ -67,5 +69,7 @@ struct SymbolTableEntry *lookup(char *identifier, _Bool func, _Bool init);
 
 struct AST_Node *change_list_params(struct AST_Node *initializer_list, enum TYPE *types, _Bool param);
 enum TYPE *insert_into_array(enum TYPE *arr, enum TYPE type);
+
+void def_func(struct SymbolTableEntry *entry);
 
 #endif // SYMBOL_TABLE_H
