@@ -1,0 +1,8 @@
+y4, x4, 
+Parent: sum
+Parent: Global Scope
+
+a4, 
+Parent: mainsum
+Parent: Global Scope
+

@@ -57,8 +57,16 @@ struct AST_Node *bool_node(_Bool value)
     return node;
 }
 
+extern enum SEMANTIC_ERROR semantic_error;
 struct AST_Node *operation_node(enum OPERATION op, struct AST_Node *left, struct AST_Node *right)
 {
+    // enum TYPE left_type = left->tag;
+    // enum TYPE right_type = right->tag;
+    // if (compatible(left_type, right_type))
+    // {
+    //     semantic_error = INCOMPATIBLE_TYPES;
+    //     return NULL;
+    // }
     struct AST_Node *node = create_node();
     node->tag = NODE_TYPE_OPERATION;
     node->op = op;

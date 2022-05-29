@@ -19,3 +19,4 @@ comparison in non-cond expressions
 
 notes:
 in insert, lookup func, check if defined but not decl then allow else deny
+operation two types
