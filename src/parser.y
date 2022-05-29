@@ -18,6 +18,14 @@
     _Bool boolValue;
     struct AST_Node *nodePointer;
     struct SymbolTableEntry *entryPointer;
+    struct PairType {
+        struct AST_Node *nodePointer;
+        union
+        {
+            int enumValue;
+            int* enumPointer;
+        };
+    } pair;
     int enumValue;
 }
 
@@ -46,7 +54,7 @@
 
 %type <nodePointer>literal
 
-%type <enumValue>unary_op assignment_op type_modifier
+%type <enumValue>unary_op assignment_op
 
 %type <nodePointer>initializer initializer_list function top_level_statement declaration
 %type <nodePointer>block_statement block_item_list statement
@@ -56,6 +64,10 @@
 %type <nodePointer>jump_statement selection_statement iteration_statement
 
 %type <nodePointer>switch_case switch_case_list
+
+%type <pair>type_modifier
+%type <nodePointer>enum_type
+%type <pair>type_modifier_list
 
 %%
 
@@ -71,8 +83,8 @@ top_level_statement     : declaration SEMICOLON
                         ;
 
     /* A declaration consists of a type, and optionally initializers. */
-declaration             : type_modifier_list initializer_list       { $$ = $2; }
-                        | type_modifier_list                        { $$ = NULL; }
+declaration             : type_modifier_list initializer_list       { $$ = $1.nodePointer == NULL ? $2 : operation_node(COMMA_OP, $1.nodePointer, $2); }
+                        | type_modifier_list                        { $$ = $1.nodePointer; }
                         ;
 
     /* Initializiers can be compounded using commas. */
@@ -288,31 +300,31 @@ non_final_catch_block   : non_final_catch_block CATCH LPAREN type_modifier_list 
     /* MISCELLANEOUS */
 
     /* A sequence of type modifiers. Need semantic checks.*/
-type_modifier_list      : type_modifier_list type_modifier
-                        | type_modifier_list CONST
-                        | type_modifier
-                        | CONST
+type_modifier_list      : type_modifier_list type_modifier  { struct PairType tmp = { .nodePointer = $2.nodePointer, .enumPointer = &$2.enumValue }; $$ = tmp; }
+                        | type_modifier_list CONST          { struct PairType tmp = { .nodePointer = NULL, .enumPointer = NULL }; $$ = tmp; }
+                        | type_modifier                     { struct PairType tmp = { .nodePointer = $1.nodePointer, .enumPointer = &$1.enumValue }; $$ = tmp; }
+                        | CONST                             { struct PairType tmp = { .nodePointer = NULL, .enumPointer = NULL }; $$ = tmp; }
                         ;
 
     /* A type modifier is a data type. */
-type_modifier           : BOOL                  { $$ = BOOL_TYPE; }
-                        | CHAR                  { $$ = CHAR_TYPE; }
-                        | DOUBLE                { $$ = DOUBLE_TYPE; }
-                        | FLOAT                 { $$ = FLOAT_TYPE; }
-                        | INT                   { $$ = INT_TYPE; }
-                        | LONG                  { $$ = LONG_TYPE; }
-                        | SHORT                 { $$ = SHORT_TYPE; }
-                        | SIGNED                { $$ = SIGNED_TYPE; }
-                        | STRING                { $$ = STRING_TYPE; }
-                        | UNSIGNED              { $$ = UNSIGNED_TYPE; }
-                        | VOID                  { $$ = VOID_TYPE; }
-                        | enum_type             { $$ = ENUM_TYPE; }
+type_modifier           : BOOL                  { struct PairType tmp = { .nodePointer = NULL, .enumValue = BOOL_TYPE }; $$ = tmp; }
+                        | CHAR                  { struct PairType tmp = { .nodePointer = NULL, .enumValue = CHAR_TYPE }; $$ = tmp; }
+                        | DOUBLE                { struct PairType tmp = { .nodePointer = NULL, .enumValue = DOUBLE_TYPE }; $$ = tmp; }
+                        | FLOAT                 { struct PairType tmp = { .nodePointer = NULL, .enumValue = FLOAT_TYPE }; $$ = tmp; }
+                        | INT                   { struct PairType tmp = { .nodePointer = NULL, .enumValue = INT_TYPE }; $$ = tmp; }
+                        | LONG                  { struct PairType tmp = { .nodePointer = NULL, .enumValue = LONG_TYPE }; $$ = tmp; }
+                        | SHORT                 { struct PairType tmp = { .nodePointer = NULL, .enumValue = SHORT_TYPE }; $$ = tmp; }
+                        | SIGNED                { struct PairType tmp = { .nodePointer = NULL, .enumValue = SIGNED_TYPE }; $$ = tmp; }
+                        | STRING                { struct PairType tmp = { .nodePointer = NULL, .enumValue = STRING_TYPE }; $$ = tmp; }
+                        | UNSIGNED              { struct PairType tmp = { .nodePointer = NULL, .enumValue = UNSIGNED_TYPE }; $$ = tmp; }
+                        | VOID                  { struct PairType tmp = { .nodePointer = NULL, .enumValue = VOID_TYPE }; $$ = tmp; }
+                        | enum_type             { struct PairType tmp = { .nodePointer = $1,   .enumValue = ENUM_TYPE }; $$ = tmp; }
                         ;
 
     /* An enum type is ENUM followed by an identifier, or an (optionally anonymous) enum declaration. */
-enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE
-                        | ENUM LBRACE initializer_list RBRACE
-                        | ENUM IDENTIFIER
+enum_type               : ENUM IDENTIFIER LBRACE initializer_list RBRACE    { $$ = $4; }
+                        | ENUM LBRACE initializer_list RBRACE               { $$ = $3; }
+                        | ENUM IDENTIFIER                                   { $$ = NULL; }
                         ;
 
     /* Unary operators. */

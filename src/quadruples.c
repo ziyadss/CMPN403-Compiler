@@ -725,7 +725,10 @@ void quadruples()
             }
             break;
         default:
-            fprintf(stderr, "Invalid top level statement: %d\n", node->tag);
+            if (node->tag == NODE_TYPE_OPERATION && node->op == COMMA_OP)
+                _operation(node, 1);
+            else
+                fprintf(stderr, "Invalid top level statement: %d, operation %d\n", node->tag, node->op);
             break;
         }
         fprintf(output_file, "\n");
