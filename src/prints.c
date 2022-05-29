@@ -3,7 +3,7 @@
 extern struct SymbolTable *current_scope;
 extern struct AST_Node *program;
 
-FILE *output_file_symbol_table = NULL;
+FILE *symbol_file = NULL;
 
 void print_node(struct AST_Node *statement)
 {
@@ -175,7 +175,7 @@ void print_table(unsigned int line)
 {
     struct SymbolTable *table = current_scope;
     // printf("\n\nSymbol table for line %d:\n", line);
-    fprintf(output_file_symbol_table, "\nAt line %d, current table: ", line);
+    fprintf(symbol_file, "\nAt line %d, current table: ", line);
     while (table != NULL)
     {
         for (unsigned int i = 0; i < ST_ARRAY_SIZE; i++)
@@ -183,15 +183,15 @@ void print_table(unsigned int line)
             struct SymbolTableEntry *head = table->buckets[i];
             while (head != NULL)
             {
-                fprintf(output_file_symbol_table, "%s", head->name);
+                fprintf(symbol_file, "%s", head->name);
                 for (ptrdiff_t i = 0; i < arrlen(head->types); i++)
-                    fprintf(output_file_symbol_table, "%d, ", head->types[i]);
+                    fprintf(symbol_file, "%d, ", head->types[i]);
 
                 head = head->next;
             }
         }
-        fprintf(output_file_symbol_table, "\nParent: ");
+        fprintf(symbol_file, "\nParent: ");
         table = table->parent;
     }
-    fprintf(output_file_symbol_table, "Global Scope\n\n");
+    fprintf(symbol_file, "Global Scope\n\n");
 }

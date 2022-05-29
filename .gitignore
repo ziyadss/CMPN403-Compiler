@@ -4,3 +4,4 @@ bin
 output.asm
 symbol_table.txt
 tests/sources/test.c
+errors.txt

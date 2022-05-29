@@ -5,7 +5,7 @@
 extern int yyparse();
 extern FILE *yyin;
 extern FILE *output_file;
-extern FILE *output_file_symbol_table;
+extern FILE *symbol_file;
 
 extern void create_program();
 extern void scope_down();
@@ -14,16 +14,17 @@ extern void destroy_global_table();
 extern void destroy_program();
 extern char *get_error_message();
 
-_Bool errored = 0;
-
 extern int yylineno;
+
+_Bool errored = 0;
+FILE *error_file;
 
 int yyerror(char *error)
 {
     char *message = get_error_message();
     message = message == NULL ? error : message;
     assert(message != NULL);
-    fprintf(stderr, "Error on line %d: %s\n", yylineno, message);
+    fprintf(error_file, "Error on line %d: %s\n", yylineno, message);
 
     errored = 1;
     return 1;
@@ -45,10 +46,18 @@ int main(int argc, char **argv)
     }
 
     char *output_filename_st = "symbol_table.txt";
-    output_file_symbol_table = fopen(output_filename_st, "w");
-    if (output_file_symbol_table == NULL)
+    symbol_file = fopen(output_filename_st, "w");
+    if (symbol_file == NULL)
     {
         fprintf(stderr, "Error: Could not open file %s\n", output_filename_st);
+        return 1;
+    }
+
+    char *error_filename_st = "error.txt";
+    error_file = fopen(error_filename_st, "w");
+    if (error_file == NULL)
+    {
+        fprintf(stderr, "Error: Could not open file %s\n", error_filename_st);
         return 1;
     }
 
@@ -82,7 +91,7 @@ int main(int argc, char **argv)
     destroy_global_table();
     destroy_program();
 
-    fclose(output_file_symbol_table);
+    fclose(symbol_file);
 
     printf("\nCleanup successful.\n");
 
